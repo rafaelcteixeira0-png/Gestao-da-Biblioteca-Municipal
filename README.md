@@ -1,8 +1,12 @@
 # Biblioteca Pública Municipal de Cianorte
 
-Primeira entrega do sistema web que apoiará a substituição da planilha de gestão da biblioteca: uma interface React + TypeScript, responsiva, com dashboard e consultas demonstrativas.
+Sistema web em evolução para apoiar o atendimento da biblioteca. A interface React + TypeScript preserva o dashboard e as consultas demonstrativas e oferece uma área de atendimento local com API Node.js e SQLite.
 
-**Todos os registros são fictícios.** A aplicação usa somente dados em memória, com data de referência fixa em **13/10/2026**. Não há banco de dados, autenticação, importação da planilha ou gravação de operações nesta entrega.
+**Use somente registros fictícios nesta entrega.** As consultas demonstrativas mantêm os exemplos em memória e a data fixa de **13/10/2026**. A opção **Atendimento local** abre uma área separada com login e registros persistidos no SQLite local. Nenhum exemplo é importado automaticamente e não há senha padrão.
+
+O atendimento permite criar e editar leitores, obras e exemplares; registrar empréstimos com vários itens; devolver parte dos itens e renovar um exemplar por vez. Permissões, versões concorrentes e exclusividade dos empréstimos são verificadas no servidor. Alterações e circulação preservam histórico. Backup criptografado e restauração em arquivo separado são feitos pela CLI.
+
+Consulte [a entrega operacional e suas limitações](docs/ENTREGA_OPERACIONAL.md) e [o resultado de recuperação com dados fictícios](docs/RECUPERACAO.json). A publicação Vercel existente continua sendo a demonstração: este servidor SQLite requer um processo Node.js com disco persistente e não foi publicado.
 
 ## O que pode ser revisado no navegador
 
@@ -15,26 +19,30 @@ Primeira entrega do sistema web que apoiará a substituição da planilha de ges
 
 ## Desenvolvimento no ambiente Codex
 
-Requer Node.js 22.12+ (CI usa Node.js 24) e npm. Os comandos abaixo são executados no ambiente de desenvolvimento; o computador institucional só precisará acessar o endereço web aprovado quando houver hospedagem.
+Requer Node.js 24+ e npm. Os comandos abaixo executam a versão local:
 
 ```bash
 npm ci
-npm run dev
+npm run library -- init
+npm run build
+npm start
 ```
 
-Abra a prévia web na porta 5173. Nenhum arquivo da planilha deve ser carregado no protótipo.
+Abra `http://localhost:3001` e escolha **Atendimento local**. A inicialização solicita usuário, nome e senha do primeiro administrador. Preserve o arquivo `.library-data/library.sqlite` e sua senha de backup. Não carregue planilhas ou dados pessoais nesta revisão. Para desenvolvimento com Vite e API em processos separados, veja a documentação operacional.
 
 ## Verificações
 
 ```bash
 npm run format:check
 npm run lint
+npm run typecheck
+npm run test:server
 npm run build
 npx playwright install chromium
 npm test
 ```
 
-`npm run build` inclui a verificação TypeScript. `npm run check` reúne formatação, lint, build e testes. Os testes Playwright executam contra a compilação de produção em computador e celular e verificam navegação, filtros, busca, detalhes, exportação, largura responsiva e acessibilidade automática com axe.
+`npm run build` inclui a verificação TypeScript. `npm run check` reúne formatação, lint, servidor, build e navegador. Os testes Playwright usam banco temporário e contas fictícias próprias; nunca reutilizam o servidor ou banco do operador. Incluem as consultas demonstrativas e os novos fluxos operacionais. A presença de um teste no repositório não significa que ele foi executado; veja os resultados registrados na documentação da entrega.
 
 Se o ambiente já disponibilizar Chromium, é possível selecionar esse executável:
 
@@ -59,11 +67,12 @@ src/
   navigation.ts Definição central do menu e rotas por fragmento
   styles.css    Layout, identidade visual e responsividade
 tests/          Verificações de interface em navegador
+server/         API, SQLite, autenticação e backup local
 docs/           Especificação, arquitetura e roteiro de revisão
 .github/        Verificações automáticas e modelo de Pull Request
 ```
 
-As fontes e a ilustração são servidas pela própria aplicação; a interface não depende de APIs, fontes remotas ou serviços externos. `package-lock.json` fixa as versões instaladas.
+As fontes e a ilustração são locais. A demonstração funciona sem API; o atendimento usa a API do mesmo servidor. Nenhum serviço externo foi contratado ou configurado. `package-lock.json` fixa as versões instaladas.
 
 ## Documentação e próximas etapas
 
@@ -72,4 +81,4 @@ As fontes e a ilustração são servidas pela própria aplicação; a interface 
 - [Arquitetura e escopo desta entrega](docs/ARQUITETURA.md)
 - [Roteiro e descrição da revisão](docs/REVISAO_PR.md)
 
-As próximas entregas dependem da validação das regras da biblioteca. Prazo, limite de exemplares, multas, renovações, reservas e disponibilidade física não são políticas definidas por este protótipo. Dados reais, autenticação e migração permanecem fora desta primeira tarefa.
+As próximas entregas dependem da validação das regras da biblioteca, da revisão no navegador e da definição aprovada de hospedagem persistente. Prazo, limite de exemplares, multas, número máximo de renovações e reservas não são políticas institucionais aprovadas nesta implementação. O operador informa as datas de vencimento. Uso real e migração continuam pendentes; títulos repetidos são preservados e identificadores internos não se tornam tombos oficiais.

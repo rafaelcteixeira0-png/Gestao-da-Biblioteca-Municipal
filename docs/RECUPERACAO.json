@@ -1,0 +1,53 @@
+{
+  "executedAt": "2026-10-18T01:41:48.498Z",
+  "reconstruction": true,
+  "datasetKind": "fictional-local",
+  "backupDurationMs": 64,
+  "restoreDurationMs": 67,
+  "restoreAndLoginDurationMs": 123,
+  "backupCounts": {
+    "settings": 3,
+    "readers": 1,
+    "works": 1,
+    "copies": 2,
+    "loans": 1,
+    "loan_items": 2,
+    "events": 6,
+    "requests": 2,
+    "auth_users": 1,
+    "auth_sessions": 0,
+    "auth_login_attempts": 0,
+    "auth_events": 1
+  },
+  "restoredCounts": {
+    "settings": 3,
+    "readers": 1,
+    "works": 1,
+    "copies": 2,
+    "loans": 1,
+    "loan_items": 2,
+    "events": 6,
+    "requests": 2,
+    "auth_users": 1,
+    "auth_sessions": 0,
+    "auth_login_attempts": 0,
+    "auth_events": 1
+  },
+  "verification": {
+    "integrity": "ok",
+    "foreignKeys": "ok",
+    "schema": "ok",
+    "records": "ok",
+    "sessionsRevoked": 0
+  },
+  "restoredRole": "admin",
+  "restoredLoans": [
+    {
+      "status": "partial",
+      "items": 2
+    }
+  ],
+  "sourceReadersAfterSnapshot": 2,
+  "restoredReaders": 1,
+  "note": "Ensaio local novo com dados fictícios. Sem medição de rede/dispositivo da biblioteca. RPO depende da frequência ainda não definida; cadastro posterior permanece apenas na origem."
+}

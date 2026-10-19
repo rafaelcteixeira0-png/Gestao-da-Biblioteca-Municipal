@@ -21,3 +21,6 @@ test-results/
 *.sql
 backups/
 dados-reais/
+.library-data/
+*.backup
+*.backup.json
