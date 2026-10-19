@@ -1,7 +1,8 @@
 import { createInterface } from 'node:readline/promises'
 import { Writable } from 'node:stream'
 import { resolve } from 'node:path'
-import { existsSync } from 'node:fs'
+import { existsSync, lstatSync } from 'node:fs'
+import { DatabaseSync } from 'node:sqlite'
 import { configuration, prepareDatabasePath } from './config.mjs'
 import { openLibrary } from './library.mjs'
 import { createAuth } from './auth.mjs'
@@ -33,6 +34,18 @@ async function main() {
   if (!['init', 'recover-admin', 'backup'].includes(command)) throw new Error('Comandos: init | recover-admin | backup <arquivo> | verify-backup <arquivo> | restore <arquivo> <novo-banco>.')
   const config = configuration()
   if (command !== 'init' && !existsSync(config.filename)) throw new Error('O banco configurado não existe.')
+  if (command === 'backup') {
+    if (!first) throw new Error('Informe um novo arquivo de backup.')
+    const info = lstatSync(config.filename)
+    if (!info.isFile() || info.isSymbolicLink()) throw new Error('O banco precisa ser um arquivo regular sem link simbólico.')
+    const passphrase = await input('Frase de proteção do backup (mínimo 16 caracteres)', process.env.LIBRARY_BACKUP_PASSPHRASE, true)
+    // Backup must never initialize or repair the source database.
+    const db = new DatabaseSync(config.filename, { readOnly: true })
+    try {
+      console.log(JSON.stringify(await createBackup({ db, outputPath: resolve(first), passphrase }), null, 2))
+    } finally { db.close() }
+    return
+  }
   prepareDatabasePath(config.filename)
   const library = openLibrary({ filename: config.filename })
   try {
@@ -51,10 +64,6 @@ async function main() {
       // The local OS account and database-file access authorize technical recovery.
       auth.resetPassword(administrator, administrator.id, { password })
       console.log('Senha redefinida, sessões encerradas e recuperação auditada.')
-    } else {
-      if (!first) throw new Error('Informe um novo arquivo de backup.')
-      const passphrase = await input('Frase de proteção do backup (mínimo 16 caracteres)', process.env.LIBRARY_BACKUP_PASSPHRASE, true)
-      console.log(JSON.stringify(await createBackup({ db: library.db, outputPath: resolve(first), passphrase }), null, 2))
     }
   } finally { library.close() }
 }

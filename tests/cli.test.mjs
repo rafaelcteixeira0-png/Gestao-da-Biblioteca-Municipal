@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync, existsSync } from 'node:fs'
+import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -59,4 +59,27 @@ test('CLI cria backup verificável e restaura isoladamente sem sobrescrever a or
     const auth = createAuth({ db: restored.db })
     assert.equal(auth.login({ username: f.env.LIBRARY_ADMIN_USERNAME, password: f.password }).user.role, 'admin')
   } finally { restored.close() }
+})
+
+test('CLI backup recusa banco vazio sem inicializar ou alterar sua origem', (t) => {
+  const f = fixture(t)
+  const targetPath = join(f.directory, 'invalid.backup')
+  writeFileSync(f.filename, '')
+  const result = f.run(['backup', targetPath])
+  assert.equal(result.status, 1)
+  assert.equal(readFileSync(f.filename).length, 0)
+  assert.equal(existsSync(targetPath), false)
+})
+
+test('CLI backup não repara silenciosamente proteções ausentes na origem', (t) => {
+  const f = fixture(t)
+  assert.equal(f.run(['init']).status, 0)
+  const library = openLibrary({ filename: f.filename })
+  library.db.exec('DROP TRIGGER events_no_update')
+  library.close()
+  const before = readFileSync(f.filename)
+  const targetPath = join(f.directory, 'invalid.backup')
+  assert.equal(f.run(['backup', targetPath]).status, 1)
+  assert.deepEqual(readFileSync(f.filename), before)
+  assert.equal(existsSync(targetPath), false)
 })

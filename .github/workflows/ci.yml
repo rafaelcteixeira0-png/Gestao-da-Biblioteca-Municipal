@@ -1,4 +1,4 @@
-name: Verificações do protótipo
+name: Verificações da biblioteca
 
 on:
   push:
@@ -18,17 +18,54 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run format:check
-      - run: npm run lint
-      - run: npm run test:server
-      - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - run: npm test
+      - id: format
+        run: npm run format:check
+        continue-on-error: true
+      - name: Registrar sugestões de formatação
+        if: steps.format.outcome == 'failure'
+        run: |
+          npm run format
+          git diff --binary > format.patch
+      - id: lint
+        run: npm run lint
+        continue-on-error: true
+      - id: types
+        run: npm run typecheck
+        continue-on-error: true
+      - id: server
+        run: npm run test:server
+        continue-on-error: true
+      - id: build
+        run: npm run build
+        continue-on-error: true
+      - id: browser
+        if: steps.build.outcome == 'success'
+        run: npx playwright install --with-deps chromium
+        continue-on-error: true
+      - id: interface
+        if: steps.build.outcome == 'success' && steps.browser.outcome == 'success'
+        run: npm test
+        continue-on-error: true
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
           name: resultados-playwright
           path: |
+            format.patch
             playwright-report/
             test-results/
           retention-days: 7
+      - name: Exigir aprovação de todas as verificações
+        if: always()
+        env:
+          FORMAT: ${{ steps.format.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          TYPES: ${{ steps.types.outcome }}
+          SERVER: ${{ steps.server.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          BROWSER: ${{ steps.browser.outcome }}
+          INTERFACE: ${{ steps.interface.outcome }}
+        run: |
+          for result in "$FORMAT" "$LINT" "$TYPES" "$SERVER" "$BUILD" "$BROWSER" "$INTERFACE"; do
+            test "$result" = success || exit 1
+          done

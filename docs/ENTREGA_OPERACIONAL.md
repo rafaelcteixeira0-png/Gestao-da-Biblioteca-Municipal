@@ -1,6 +1,6 @@
 # Entrega operacional local — reconstrução de 18/10/2026
 
-Esta entrega acrescenta atendimento com gravação em SQLite à aplicação existente. O ambiente é exclusivamente local e utiliza dados fictícios. A validação da interface continua pendente enquanto as dependências de desenvolvimento e o navegador não estiverem disponíveis.
+Esta entrega acrescenta atendimento com gravação em SQLite à aplicação existente. O ambiente é exclusivamente local e utiliza dados fictícios. A validação da interface continua pendente enquanto as dependências de desenvolvimento não estiverem disponíveis. Existe Chromium instalado, mas falta o executor de testes do projeto.
 
 ## Origem e situação do trabalho
 
@@ -8,7 +8,7 @@ O repositório público foi recuperado a partir do commit `2f39c4054ea49173839b6
 
 As entregas operacionais e os commits locais mencionados anteriormente na conversa não estavam presentes neste ambiente. A implementação aqui documentada foi reconstruída sobre o código público recuperado. Os documentos originais do repositório foram preservados e descrevem a etapa anterior de demonstração; este documento registra o incremento operacional atual.
 
-Os anexos de auditoria, planejamento e backlog não estão disponíveis neste ambiente. O mapeamento para os identificadores reais das tarefas do backlog está pendente de recuperação desses documentos. Nenhum identificador foi presumido.
+Os anexos `Auditoria_Biblioteca_Cianorte.pdf`, `Auditoria_Biblioteca_Cianorte.md`, `Planejamento_Biblioteca_Cianorte.xlsx` e `Backlog_Codex_Biblioteca.md` não estão disponíveis neste ambiente. O mapeamento para os identificadores reais das tarefas do backlog está pendente de recuperação desses documentos. Nenhum identificador foi presumido.
 
 Não houve importação ou migração de dados reais, exclusão de registros institucionais, contratação de serviços, push, merge ou publicação em produção.
 
@@ -135,18 +135,25 @@ Nesse ensaio pequeno e fictício, o backup levou 64 ms, a restauração 67 ms e 
 
 ## Validação nesta reconstrução
 
-**82 testes nativos do servidor aprovados.** A suíte cobre domínio e persistência, autenticação e permissões, API, backup/restauração e CLI. Inclui sucesso, exemplar indisponível, dados inválidos, conflitos de versão, histórico preservado, acesso permitido e negado, revogação de sessões e recuperação em arquivo separado.
+**89 testes nativos do servidor aprovados nesta reconstrução, sem falhas ou testes ignorados.** São 31 de domínio/SQLite, 18 de autenticação, 7 da API, 24 de backup, 4 da CLI e 5 de configuração. Incluem sucesso, exemplar indisponível, dados inválidos, conflitos de versão, histórico preservado, acesso permitido e negado, revogação de sessões e recuperação em arquivo separado. A disputa de empréstimo usa duas conexões em workers; a API foi exercitada por objetos Request/Response, sem abrir uma porta HTTP neste ambiente.
 
 | Verificação | Situação deste registro |
 | --- | --- |
-| Testes nativos: `npm run test:server` | 82 aprovados. |
-| Tipos: `npm run typecheck` | Pendente de execução com as dependências disponíveis. |
-| Lint: `npm run lint` | Pendente de execução com as dependências disponíveis. |
-| Formatação: `npm run format:check` | Pendente de execução com as dependências disponíveis. |
-| Build: `npm run build` | Pendente de execução com as dependências disponíveis. |
-| Playwright: `npm test` | Testes preparados; execução de navegador pendente. |
+| Testes nativos: `npm run test:server` | 89 aprovados, 0 falhas, 0 ignorados. |
+| Sintaxe Node: `node --check` | Todos os arquivos MJS de servidor e testes aprovados. |
+| Script: `bash -n scripts/validate-local.sh` | Aprovado. |
+| Whitespace: `git diff --check` | Aprovado. |
+| Tipos: `npm run typecheck` | Tentativa encerrou com código 127: `tsc: not found`. |
+| Lint: `npm run lint` | Tentativa encerrou com código 127: `eslint: not found`. |
+| Formatação: `npm run format:check` | Tentativa encerrou com código 127: `prettier: not found`. |
+| Build: `npm run build` | Tentativa encerrou com código 127: `tsc: not found`. |
+| Playwright: `npm test` | Não executou testes: sem `@playwright/test`, encontrou CLI Python global e encerrou com `unknown command 'test'` (código 1). |
+
+As tentativas de obter permissão para instalar dependências não receberam resposta antes de serem encerradas de forma limitada; não houve aprovação nem rejeição automática explícita. `node_modules` permanece ausente. A execução normal do sandbox bloqueou rede e abertura de porta local com `EPERM`. Esses impedimentos não são resultados aprovados dos checks. O CI foi preparado para executar cada verificação, guardar sugestões de formatação e reprovar a execução se qualquer etapa falhar. Seu uso com esta branch depende da autorização de push, ainda não recebida no momento deste registro.
 
 Os novos testes em `tests/operational.spec.ts` usam o servidor real e banco temporário fictício, sem mocks. Cobrem o fluxo administrativo de cadastro, edição, empréstimo de dois exemplares, devolução parcial, renovação, recarga e histórico; negação ao perfil leitor; atendimento autorizado com administração de contas negada; validação e concorrência; teclado, axe e larguras de 320, 390 e 1440 pixels. Estão configurados projetos desktop e mobile com Chromium. A existência dos testes não significa que esses cenários de navegador já passaram. As configurações mobile emulam um navegador e não substituem teste em aparelho físico.
+
+O resumo dos comandos efetivamente executados está em [VALIDACAO_TECNICA.json](VALIDACAO_TECNICA.json); a saída completa da suíte nativa está em [TESTES_SERVIDOR.txt](TESTES_SERVIDOR.txt). Esses registros pertencem a esta reconstrução e não reutilizam a contagem de 59 testes de uma execução anterior.
 
 Para executar as verificações quando as dependências estiverem disponíveis:
 
@@ -161,6 +168,8 @@ npm test
 ```
 
 O Playwright inicia `tests/start-server.mjs` em `127.0.0.1:4173` com banco temporário próprio. As contas e senhas fixas dessa fixture existem apenas nos testes; o início normal da aplicação não as cria. O relatório fica em `playwright-report/`, e os artefatos de falhas ficam em `test-results/`. Esses diretórios não são versionados.
+
+`bash scripts/validate-local.sh` instala dependências e executa a sequência completa localmente, usando Chromium instalado quando disponível. O script aplica Prettier antes dos checks; revise o diff resultante. A análise de tipos abrange também os arquivos `tests/*.spec.ts`. Os 12 cenários de interface originais foram preservados; com os 5 novos e os dois projetos de navegador, há 34 execuções previstas, ainda não realizadas nesta reconstrução. A suíte prepara capturas do atendimento para revisão visual posterior; nenhuma captura foi produzida ou inspecionada nesta execução.
 
 ## Pendências e próxima etapa
 

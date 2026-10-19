@@ -18,7 +18,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc -b",
     "test": "playwright test",
-    "test:server": "node --test --test-isolation=none tests/library.test.mjs tests/auth.test.mjs tests/api.test.mjs tests/backup.test.mjs tests/cli.test.mjs",
+    "test:server": "node --test --test-isolation=none tests/library.test.mjs tests/auth.test.mjs tests/api.test.mjs tests/backup.test.mjs tests/cli.test.mjs tests/config.test.mjs",
     "check": "npm run format:check && npm run lint && npm run test:server && npm run build && npm test"
   },
   "dependencies": {

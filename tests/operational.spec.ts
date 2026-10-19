@@ -149,7 +149,12 @@ test('administração cadastra, edita, empresta dois exemplares e preserva devol
   expect(copies[0].id).not.toBe(copies[1].id)
   await page.getByLabel('Buscar em exemplares').fill(title)
   const copiesTable = page.getByRole('region', { name: 'Tabela de exemplares' })
-  await expect(copiesTable.getByText('Sem tombo oficial', { exact: true })).toHaveCount(2)
+  await expect(copiesTable.getByRole('row')).toHaveCount(3)
+  for (const copy of copies) {
+    await expect(
+      copiesTable.getByRole('row').filter({ hasText: copy.id }),
+    ).toContainText('Sem tombo oficial')
+  }
   await page.getByRole('button', { name: `Editar exemplar ${copies[0].id}` }).click()
   await page.getByLabel('Condição física').fill('Revisado para teste fictício')
   await mutation<RecordIdentity>(page, `/copies/${copies[0].id}`, 'PATCH', () =>
@@ -300,7 +305,13 @@ test('atendente cadastra leitor e não administra contas', async ({ page }) => {
 
 test('servidor rejeita cadastro inválido e edição desatualizada sem apagar o histórico', async ({ page }) => {
   const session = await login(page)
-  await page.getByLabel('Nome do leitor').fill('A')
+  // Raw input passes HTML minlength; trimming still leaves an invalid server value.
+  await page.getByLabel('Nome do leitor').fill('  A  ')
+  expect(
+    await page
+      .getByLabel('Nome do leitor')
+      .evaluate((input) => (input as HTMLInputElement).checkValidity()),
+  ).toBe(true)
   const invalidResponse = page.waitForResponse(
     (response) => new URL(response.url()).pathname === '/api/readers' && response.request().method() === 'POST',
   )
@@ -368,6 +379,9 @@ test('acesso por teclado, formulários e consultas mantêm acessibilidade e larg
     for (const width of [320, 390, 1440]) {
       await page.setViewportSize({ width, height: 1000 })
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${name} sem transbordamento em ${width}px`).toBe(true)
+      if (test.info().project.name === 'desktop' && width !== 320 && ['Leitores', 'Circulação', 'Histórico'].includes(name)) {
+        await page.screenshot({ path: test.info().outputPath(`atendimento-${name}-${width}.png`), fullPage: true })
+      }
     }
     const accessibility = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])

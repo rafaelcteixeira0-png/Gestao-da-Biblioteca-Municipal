@@ -36,6 +36,7 @@ function text(value, label, maximum = 200, minimum = 0) {
     fail(400, 'INVALID_FIELD', `${label} deve ser um texto.`)
   }
   const result = value.normalize('NFKC').trim().replace(/\s+/gu, ' ')
+  // eslint-disable-next-line no-control-regex -- Reject controls in persisted fields.
   if (result.length < minimum || result.length > maximum || /[\u0000-\u001f\u007f]/u.test(result)) {
     fail(400, 'INVALID_FIELD', `${label} deve ter entre ${minimum} e ${maximum} caracteres válidos.`)
   }

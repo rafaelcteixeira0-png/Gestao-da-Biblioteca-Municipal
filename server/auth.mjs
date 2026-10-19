@@ -37,6 +37,8 @@ function usernameValue(value) {
 function nameValue(value) {
   if (typeof value !== 'string') throw invalid()
   const name = value.trim()
+  // Rejecting control characters is intentional for server-side field validation.
+  // eslint-disable-next-line no-control-regex
   if (!name || name.length > 120 || /[\u0000-\u001f\u007f]/.test(name)) throw invalid()
   return name
 }
@@ -48,6 +50,7 @@ function passwordValue(value) {
     value.length > 128 ||
     !/\p{L}/u.test(value) ||
     !/\p{N}/u.test(value) ||
+    // eslint-disable-next-line no-control-regex -- Passwords must not contain controls.
     /[\u0000-\u001f\u007f]/.test(value)
   ) {
     throw new AuthError(
