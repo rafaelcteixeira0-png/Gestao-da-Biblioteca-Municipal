@@ -1,4 +1,10 @@
-import { randomBytes, randomUUID, scryptSync, timingSafeEqual, createHash } from 'node:crypto'
+import {
+  randomBytes,
+  randomUUID,
+  scryptSync,
+  timingSafeEqual,
+  createHash,
+} from 'node:crypto'
 
 const SESSION_MS = 8 * 60 * 60 * 1000
 const ATTEMPT_MS = 15 * 60 * 1000
@@ -18,12 +24,22 @@ export class AuthError extends Error {
   }
 }
 
-const invalid = () => new AuthError(400, 'INVALID_INPUT', 'Confira os campos informados.')
-const denied = () => new AuthError(403, 'FORBIDDEN', 'Você não tem permissão para esta operação.')
+const invalid = () =>
+  new AuthError(400, 'INVALID_INPUT', 'Confira os campos informados.')
+const denied = () =>
+  new AuthError(403, 'FORBIDDEN', 'Você não tem permissão para esta operação.')
 const credentialsError = () =>
-  new AuthError(401, 'INVALID_CREDENTIALS', 'Não foi possível entrar. Confira suas credenciais.')
+  new AuthError(
+    401,
+    'INVALID_CREDENTIALS',
+    'Não foi possível entrar. Confira suas credenciais.',
+  )
 const conflict = () =>
-  new AuthError(409, 'CONFLICT', 'Os dados foram alterados ou já estão em uso. Atualize e tente novamente.')
+  new AuthError(
+    409,
+    'CONFLICT',
+    'Os dados foram alterados ou já estão em uso. Atualize e tente novamente.',
+  )
 
 function hash(value) {
   return createHash('sha256').update(value).digest('hex')
@@ -39,7 +55,8 @@ function usernameValue(value) {
 function nameValue(value) {
   if (typeof value !== 'string') throw invalid()
   const name = value.trim()
-  if (!name || name.length > 120 || controlCharacters.test(name)) throw invalid()
+  if (!name || name.length > 120 || controlCharacters.test(name))
+    throw invalid()
   return name
 }
 
@@ -68,7 +85,9 @@ function passwordRecord(password) {
 
 function matchesPassword(password, row) {
   const candidate =
-    typeof password === 'string' && password.length <= 128 ? password : 'credencial-invalida'
+    typeof password === 'string' && password.length <= 128
+      ? password
+      : 'credencial-invalida'
   const digest = scryptSync(candidate, row?.password_salt || DUMMY_SALT, 64)
   const expected = row ? Buffer.from(row.password_hash, 'hex') : DUMMY_HASH
   return timingSafeEqual(digest, expected) && Boolean(row)
@@ -85,8 +104,13 @@ function userDTO(row) {
   }
 }
 
-export function createAuth({ db, clock = () => Date.now(), secureCookies = false }) {
-  if (!db || typeof clock !== 'function' || typeof secureCookies !== 'boolean') throw invalid()
+export function createAuth({
+  db,
+  clock = () => Date.now(),
+  secureCookies = false,
+}) {
+  if (!db || typeof clock !== 'function' || typeof secureCookies !== 'boolean')
+    throw invalid()
   db.exec(`
     CREATE TABLE IF NOT EXISTS auth_users (
       id TEXT PRIMARY KEY,
@@ -154,7 +178,11 @@ export function createAuth({ db, clock = () => Date.now(), secureCookies = false
         ? db.prepare('SELECT * FROM auth_users WHERE id = ?').get(actor.id)
         : null
     if (!row?.active) {
-      throw new AuthError(401, 'AUTH_REQUIRED', 'Entre novamente para continuar.')
+      throw new AuthError(
+        401,
+        'AUTH_REQUIRED',
+        'Entre novamente para continuar.',
+      )
     }
     if (adminOnly && row.role !== 'admin') throw denied()
     return row
@@ -182,8 +210,14 @@ export function createAuth({ db, clock = () => Date.now(), secureCookies = false
 
   function bootstrap(body) {
     return transaction(() => {
-      if (db.prepare('SELECT COUNT(*) AS count FROM auth_users').get().count !== 0) {
-        throw new AuthError(409, 'ALREADY_INITIALIZED', 'A conta inicial já foi configurada.')
+      if (
+        db.prepare('SELECT COUNT(*) AS count FROM auth_users').get().count !== 0
+      ) {
+        throw new AuthError(
+          409,
+          'ALREADY_INITIALIZED',
+          'A conta inicial já foi configurada.',
+        )
       }
       return createUser(body, 'admin', null)
     })
@@ -191,13 +225,17 @@ export function createAuth({ db, clock = () => Date.now(), secureCookies = false
 
   function login(body, fingerprint = 'local') {
     const suppliedUsername =
-      typeof body?.username === 'string' ? body.username.trim().toLowerCase().slice(0, 256) : ''
+      typeof body?.username === 'string'
+        ? body.username.trim().toLowerCase().slice(0, 256)
+        : ''
     const usernameHash = hash(suppliedUsername)
     const fingerprintHash = hash(String(fingerprint).slice(0, 1024))
     // A falha precisa ser confirmada na transação antes de retornar erro ao chamador.
     const result = transaction(() => {
       const now = clock()
-      db.prepare('DELETE FROM auth_login_attempts WHERE created_at <= ?').run(now - ATTEMPT_MS)
+      db.prepare('DELETE FROM auth_login_attempts WHERE created_at <= ?').run(
+        now - ATTEMPT_MS,
+      )
       const attempts = db
         .prepare(
           `SELECT COUNT(*) AS count FROM auth_login_attempts
@@ -205,7 +243,9 @@ export function createAuth({ db, clock = () => Date.now(), secureCookies = false
         )
         .get(now - ATTEMPT_MS, usernameHash, fingerprintHash).count
       if (attempts >= MAX_ATTEMPTS) return { limited: true }
-      const row = db.prepare('SELECT * FROM auth_users WHERE username = ?').get(suppliedUsername)
+      const row = db
+        .prepare('SELECT * FROM auth_users WHERE username = ?')
+        .get(suppliedUsername)
       if (!matchesPassword(body?.password, row) || !row.active) {
         db.prepare(
           `INSERT INTO auth_login_attempts
@@ -223,7 +263,11 @@ export function createAuth({ db, clock = () => Date.now(), secureCookies = false
         'DELETE FROM auth_login_attempts WHERE username_hash = ? AND fingerprint_hash = ?',
       ).run(usernameHash, fingerprintHash)
       event(row.id, 'LOGIN', row.id)
-      return { token, user: userDTO(row), expiresAt: new Date(expiresAt).toISOString() }
+      return {
+        token,
+        user: userDTO(row),
+        expiresAt: new Date(expiresAt).toISOString(),
+      }
     })
     if (result.limited) {
       throw new AuthError(
@@ -237,7 +281,8 @@ export function createAuth({ db, clock = () => Date.now(), secureCookies = false
   }
 
   function authenticate(token) {
-    if (typeof token !== 'string' || token.length < 32 || token.length > 256) return null
+    if (typeof token !== 'string' || token.length < 32 || token.length > 256)
+      return null
     const row = db
       .prepare(
         `SELECT u.* FROM auth_sessions s JOIN auth_users u ON u.id = s.user_id
@@ -251,23 +296,33 @@ export function createAuth({ db, clock = () => Date.now(), secureCookies = false
     if (typeof token !== 'string' || token.length > 256) return
     transaction(() => {
       const tokenHash = hash(token)
-      const row = db.prepare('SELECT user_id FROM auth_sessions WHERE token_hash = ?').get(tokenHash)
+      const row = db
+        .prepare('SELECT user_id FROM auth_sessions WHERE token_hash = ?')
+        .get(tokenHash)
       if (!row) return
-      db.prepare('DELETE FROM auth_sessions WHERE token_hash = ?').run(tokenHash)
+      db.prepare('DELETE FROM auth_sessions WHERE token_hash = ?').run(
+        tokenHash,
+      )
       event(row.user_id, 'LOGOUT', row.user_id)
     })
   }
 
   function listUsers(actor) {
     currentActor(actor, true)
-    return db.prepare('SELECT * FROM auth_users ORDER BY name, id').all().map(userDTO)
+    return db
+      .prepare('SELECT * FROM auth_users ORDER BY name, id')
+      .all()
+      .map(userDTO)
   }
 
   function saveUser(actor, body, id) {
     return transaction(() => {
       const administrator = currentActor(actor, true)
       const role = body?.role ?? 'reader'
-      if (!ROLES.has(role) || (body?.active !== undefined && typeof body.active !== 'boolean')) {
+      if (
+        !ROLES.has(role) ||
+        (body?.active !== undefined && typeof body.active !== 'boolean')
+      ) {
         throw invalid()
       }
       if (id === undefined) {
@@ -276,20 +331,33 @@ export function createAuth({ db, clock = () => Date.now(), secureCookies = false
       }
       if (typeof id !== 'string') throw invalid()
       const row = db.prepare('SELECT * FROM auth_users WHERE id = ?').get(id)
-      if (!row || !Number.isSafeInteger(body?.version) || row.version !== body.version) throw conflict()
+      if (
+        !row ||
+        !Number.isSafeInteger(body?.version) ||
+        row.version !== body.version
+      )
+        throw conflict()
       const username = usernameValue(body.username)
       const name = nameValue(body.name)
       const active = body.active ?? Boolean(row.active)
       if (row.active && row.role === 'admin' && (!active || role !== 'admin')) {
         const admins = db
-          .prepare("SELECT COUNT(*) AS count FROM auth_users WHERE active = 1 AND role = 'admin'")
+          .prepare(
+            "SELECT COUNT(*) AS count FROM auth_users WHERE active = 1 AND role = 'admin'",
+          )
           .get().count
         if (admins <= 1) {
-          throw new AuthError(409, 'LAST_ADMIN', 'Mantenha ao menos uma conta administrativa ativa.')
+          throw new AuthError(
+            409,
+            'LAST_ADMIN',
+            'Mantenha ao menos uma conta administrativa ativa.',
+          )
         }
       }
       const password =
-        body.password === undefined ? null : passwordRecord(passwordValue(body.password))
+        body.password === undefined
+          ? null
+          : passwordRecord(passwordValue(body.password))
       try {
         db.prepare(
           `UPDATE auth_users SET username = ?, name = ?, role = ?, active = ?,
@@ -310,11 +378,18 @@ export function createAuth({ db, clock = () => Date.now(), secureCookies = false
         if (error.errcode === 2067) throw conflict()
         throw error
       }
-      if (password || row.role !== role || !active || row.username !== username) {
+      if (
+        password ||
+        row.role !== role ||
+        !active ||
+        row.username !== username
+      ) {
         db.prepare('DELETE FROM auth_sessions WHERE user_id = ?').run(id)
       }
       event(administrator.id, 'USER_UPDATED', id)
-      return userDTO(db.prepare('SELECT * FROM auth_users WHERE id = ?').get(id))
+      return userDTO(
+        db.prepare('SELECT * FROM auth_users WHERE id = ?').get(id),
+      )
     })
   }
 
@@ -334,7 +409,9 @@ export function createAuth({ db, clock = () => Date.now(), secureCookies = false
       if (!matchesPassword(body?.currentPassword, row)) throw credentialsError()
       if (body.currentPassword === body.newPassword) throw invalid()
       setPassword(row.id, row.id, body?.newPassword, 'PASSWORD_CHANGED')
-      return userDTO(db.prepare('SELECT * FROM auth_users WHERE id = ?').get(row.id))
+      return userDTO(
+        db.prepare('SELECT * FROM auth_users WHERE id = ?').get(row.id),
+      )
     })
   }
 
@@ -342,10 +419,15 @@ export function createAuth({ db, clock = () => Date.now(), secureCookies = false
     return transaction(() => {
       const administrator = currentActor(actor, true)
       if (typeof userId !== 'string') throw invalid()
-      const target = db.prepare('SELECT * FROM auth_users WHERE id = ?').get(userId)
-      if (!target) throw new AuthError(404, 'NOT_FOUND', 'Conta não encontrada.')
+      const target = db
+        .prepare('SELECT * FROM auth_users WHERE id = ?')
+        .get(userId)
+      if (!target)
+        throw new AuthError(404, 'NOT_FOUND', 'Conta não encontrada.')
       setPassword(administrator.id, userId, body?.password, 'PASSWORD_RESET')
-      return userDTO(db.prepare('SELECT * FROM auth_users WHERE id = ?').get(userId))
+      return userDTO(
+        db.prepare('SELECT * FROM auth_users WHERE id = ?').get(userId),
+      )
     })
   }
 

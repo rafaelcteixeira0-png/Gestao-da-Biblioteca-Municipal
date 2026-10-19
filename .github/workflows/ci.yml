@@ -46,12 +46,19 @@ jobs:
         if: steps.build.outcome == 'success' && steps.browser.outcome == 'success'
         run: npm test
         continue-on-error: true
+      - name: Guardar formatador para reprodução local
+        if: always()
+        run: |
+          if test -d node_modules/prettier; then
+            tar -czf prettier-runtime.tar.gz -C node_modules prettier
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: resultados-playwright
           path: |
             format.patch
+            prettier-runtime.tar.gz
             playwright-report/
             test-results/
           retention-days: 7

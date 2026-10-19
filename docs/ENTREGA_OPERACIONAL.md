@@ -14,18 +14,18 @@ Não houve importação ou migração de dados reais, exclusão de registros ins
 
 ## Comportamento implementado
 
-| Área | Comportamento atual |
-| --- | --- |
-| Persistência | Banco SQLite em arquivo local, chaves estrangeiras, identificadores UUID, versões de registros e transações de escrita. |
-| Acesso | Login por conta individual; sessões com expiração, cookie `HttpOnly` e `SameSite=Strict`; verificação de origem e CSRF nas operações de alteração. As permissões são verificadas no servidor. |
-| Administração | Criação e edição de contas, troca da própria senha, redefinição administrativa e revogação de sessões. Há recuperação técnica pelo terminal com acesso ao arquivo local do banco. |
-| Leitores | Cadastro e edição de nome e situação, busca, filtro e paginação. Este incremento não coleta CPF, endereço, telefone ou outros contatos. |
-| Obras | Cadastro e edição de título, autor, categoria, edição e volume, com busca e paginação. |
-| Exemplares | Cadastro e edição de unidades vinculadas à obra, com UUID próprio, localização, conservação e estado. Tombo oficial é opcional; UUID e códigos demonstrativos não se tornam tombos. |
-| Circulação | Um empréstimo pode reunir vários exemplares. Uma transação e um índice único parcial impedem dois empréstimos ativos do mesmo exemplar. Há devolução parcial e renovação individual com novo prazo e motivo. |
-| Histórico | Eventos de cadastro, edição e circulação preservam valores anteriores e posteriores, responsável e metadados. O banco impede atualização e exclusão dos eventos. Eventos de segurança ficam em uma trilha própria. |
-| Concorrência | Edições exigem a versão atual do registro. Versão desatualizada gera conflito, sem substituir a alteração anterior. Comandos de circulação usam identificadores de solicitação para permitir repetição idempotente. |
-| Recuperação | Backup consistente criptografado, verificação de integridade e restauração em novo arquivo. A restauração revoga as sessões contidas na cópia. |
+| Área          | Comportamento atual                                                                                                                                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Persistência  | Banco SQLite em arquivo local, chaves estrangeiras, identificadores UUID, versões de registros e transações de escrita.                                                                                             |
+| Acesso        | Login por conta individual; sessões com expiração, cookie `HttpOnly` e `SameSite=Strict`; verificação de origem e CSRF nas operações de alteração. As permissões são verificadas no servidor.                       |
+| Administração | Criação e edição de contas, troca da própria senha, redefinição administrativa e revogação de sessões. Há recuperação técnica pelo terminal com acesso ao arquivo local do banco.                                   |
+| Leitores      | Cadastro e edição de nome e situação, busca, filtro e paginação. Este incremento não coleta CPF, endereço, telefone ou outros contatos.                                                                             |
+| Obras         | Cadastro e edição de título, autor, categoria, edição e volume, com busca e paginação.                                                                                                                              |
+| Exemplares    | Cadastro e edição de unidades vinculadas à obra, com UUID próprio, localização, conservação e estado. Tombo oficial é opcional; UUID e códigos demonstrativos não se tornam tombos.                                 |
+| Circulação    | Um empréstimo pode reunir vários exemplares. Uma transação e um índice único parcial impedem dois empréstimos ativos do mesmo exemplar. Há devolução parcial e renovação individual com novo prazo e motivo.        |
+| Histórico     | Eventos de cadastro, edição e circulação preservam valores anteriores e posteriores, responsável e metadados. O banco impede atualização e exclusão dos eventos. Eventos de segurança ficam em uma trilha própria.  |
+| Concorrência  | Edições exigem a versão atual do registro. Versão desatualizada gera conflito, sem substituir a alteração anterior. Comandos de circulação usam identificadores de solicitação para permitir repetição idempotente. |
+| Recuperação   | Backup consistente criptografado, verificação de integridade e restauração em novo arquivo. A restauração revoga as sessões contidas na cópia.                                                                      |
 
 Senhas são armazenadas com scrypt e salt. Tokens de sessão são armazenados por hash. A autorização é reavaliada a partir da conta no banco; ocultar uma ação na interface não é o único controle de acesso.
 
@@ -137,17 +137,17 @@ Nesse ensaio pequeno e fictício, o backup levou 64 ms, a restauração 67 ms e 
 
 **89 testes nativos do servidor aprovados nesta reconstrução, sem falhas ou testes ignorados.** São 31 de domínio/SQLite, 18 de autenticação, 7 da API, 24 de backup, 4 da CLI e 5 de configuração. Incluem sucesso, exemplar indisponível, dados inválidos, conflitos de versão, histórico preservado, acesso permitido e negado, revogação de sessões e recuperação em arquivo separado. A disputa de empréstimo usa duas conexões em workers; a API foi exercitada por objetos Request/Response, sem abrir uma porta HTTP neste ambiente.
 
-| Verificação | Situação deste registro |
-| --- | --- |
-| Testes nativos: `npm run test:server` | 89 aprovados, 0 falhas, 0 ignorados. |
-| Sintaxe Node: `node --check` | Todos os arquivos MJS de servidor e testes aprovados. |
-| Script: `bash -n scripts/validate-local.sh` | Aprovado. |
-| Whitespace: `git diff --check` | Aprovado. |
-| Tipos: `npm run typecheck` | Tentativa encerrou com código 127: `tsc: not found`. |
-| Lint: `npm run lint` | Tentativa encerrou com código 127: `eslint: not found`. |
-| Formatação: `npm run format:check` | Tentativa encerrou com código 127: `prettier: not found`. |
-| Build: `npm run build` | Tentativa encerrou com código 127: `tsc: not found`. |
-| Playwright: `npm test` | Não executou testes: sem `@playwright/test`, encontrou CLI Python global e encerrou com `unknown command 'test'` (código 1). |
+| Verificação                                 | Situação deste registro                                                                                                      |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Testes nativos: `npm run test:server`       | 89 aprovados, 0 falhas, 0 ignorados.                                                                                         |
+| Sintaxe Node: `node --check`                | Todos os arquivos MJS de servidor e testes aprovados.                                                                        |
+| Script: `bash -n scripts/validate-local.sh` | Aprovado.                                                                                                                    |
+| Whitespace: `git diff --check`              | Aprovado.                                                                                                                    |
+| Tipos: `npm run typecheck`                  | Tentativa encerrou com código 127: `tsc: not found`.                                                                         |
+| Lint: `npm run lint`                        | Tentativa encerrou com código 127: `eslint: not found`.                                                                      |
+| Formatação: `npm run format:check`          | Tentativa encerrou com código 127: `prettier: not found`.                                                                    |
+| Build: `npm run build`                      | Tentativa encerrou com código 127: `tsc: not found`.                                                                         |
+| Playwright: `npm test`                      | Não executou testes: sem `@playwright/test`, encontrou CLI Python global e encerrou com `unknown command 'test'` (código 1). |
 
 As tentativas de obter permissão para instalar dependências não receberam resposta antes de serem encerradas de forma limitada; não houve aprovação nem rejeição automática explícita. `node_modules` permanece ausente. A execução normal do sandbox bloqueou rede e abertura de porta local com `EPERM`. Esses impedimentos não são resultados aprovados dos checks. O CI foi preparado para executar cada verificação, guardar sugestões de formatação e reprovar a execução se qualquer etapa falhar. Seu uso com esta branch depende da autorização de push, ainda não recebida no momento deste registro.
 

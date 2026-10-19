@@ -45,7 +45,8 @@
   font: inherit;
 }
 
-.operational-page :is(button, input, select, textarea, summary, a):focus-visible,
+.operational-page
+  :is(button, input, select, textarea, summary, a):focus-visible,
 .operational-page .op-table-wrap:focus-visible {
   outline: 3px solid #2563cf;
   outline-offset: 3px;
@@ -704,7 +705,17 @@
   font-weight: 600;
 }
 
-.operational-page .op-form fieldset > :is(.op-note, .op-actions, .op-copy-options, .op-pagination, .op-selected, button) {
+.operational-page
+  .op-form
+  fieldset
+  > :is(
+    .op-note,
+    .op-actions,
+    .op-copy-options,
+    .op-pagination,
+    .op-selected,
+    button
+  ) {
   grid-column: 1 / -1;
 }
 
