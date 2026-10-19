@@ -12,6 +12,8 @@ export class LibraryError extends Error {
 }
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+// eslint-disable-next-line no-control-regex -- Reject controls in persisted fields.
+const controlCharacters = /[\u0000-\u001f\u007f]/u
 const own = (object, key) => Object.hasOwn(object, key)
 const fail = (status, code, message, details) => {
   throw new LibraryError(status, code, message, details)
@@ -36,8 +38,7 @@ function text(value, label, maximum = 200, minimum = 0) {
     fail(400, 'INVALID_FIELD', `${label} deve ser um texto.`)
   }
   const result = value.normalize('NFKC').trim().replace(/\s+/gu, ' ')
-  // eslint-disable-next-line no-control-regex -- Reject controls in persisted fields.
-  if (result.length < minimum || result.length > maximum || /[\u0000-\u001f\u007f]/u.test(result)) {
+  if (result.length < minimum || result.length > maximum || controlCharacters.test(result)) {
     fail(400, 'INVALID_FIELD', `${label} deve ter entre ${minimum} e ${maximum} caracteres válidos.`)
   }
   return result
