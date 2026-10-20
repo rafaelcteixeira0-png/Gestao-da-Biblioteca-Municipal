@@ -14,5 +14,5 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["tests/**/*.spec.ts"]
+  "include": ["tests/**/*.spec.ts", "tests/**/*.test.ts"]
 }

@@ -1,72 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import '../operational.css'
+import { ApiError, persistedApi } from '../operational/client'
+import {
+  createDemoClient,
+  PUBLIC_DEMO_USERNAME,
+  PUBLIC_DEMO_PASSWORD,
+} from '../operational/demo'
+import type {
+  Copy,
+  Event,
+  Loan,
+  OperationalClient,
+  Reader,
+  Records,
+  Session,
+  User,
+  Work,
+} from '../operational/types'
 
-type Role = 'admin' | 'staff' | 'reader'
-type User = {
-  id: string
-  username: string
-  name: string
-  role: Role
-  active: boolean
-  version: number
-}
-type Session = { user: User; csrfToken: string }
-type Reader = { id: string; name: string; active: boolean; version: number }
-type Work = {
-  id: string
-  title: string
-  author: string
-  category: string
-  edition: string
-  volume: string
-  version: number
-}
-type Copy = {
-  id: string
-  workId: string
-  accessionNumber: string | null
-  shelf: string
-  condition: string
-  state: 'active' | 'withdrawn'
-  status: 'available' | 'loaned' | 'withdrawn'
-  version: number
-}
-type LoanItem = {
-  id: string
-  copyId: string
-  title: string
-  accessionNumber: string | null
-  dueAt: string
-  returnedAt: string | null
-  renewalCount: number
-}
-type Loan = {
-  id: string
-  readerId: string
-  readerName: string
-  borrowedAt: string
-  status: 'open' | 'partial' | 'returned'
-  items: LoanItem[]
-}
-type Event = {
-  id: string
-  occurredAt: string
-  actorId: string
-  type: string
-  entityId: string
-  before: unknown
-  after: unknown
-  metadata?: unknown
-}
-type Records = {
-  readers: Reader[]
-  works: Work[]
-  copies: Copy[]
-  loans: Loan[]
-  events: Event[]
-  users: User[]
-}
 type Tab = 'readers' | 'works' | 'copies' | 'loans' | 'events' | 'users'
 type Notice = { kind: 'error' | 'success'; text: string } | null
 type Save = (
@@ -150,43 +102,6 @@ function dueDate(value: FormDataEntryValue | null) {
 }
 function field(data: FormData, key: string) {
   return String(data.get(key) ?? '').trim()
-}
-class ApiError extends Error {
-  status: number
-  constructor(message: string, status: number) {
-    super(message)
-    this.status = status
-  }
-}
-async function api<T>(
-  path: string,
-  method = 'GET',
-  body?: Record<string, unknown>,
-  csrfToken?: string,
-): Promise<T> {
-  const response = await fetch(`/api${path}`, {
-    method,
-    credentials: 'same-origin',
-    headers: {
-      Accept: 'application/json',
-      ...(body ? { 'Content-Type': 'application/json' } : {}),
-      ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
-    },
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  })
-  const result = await response.json().catch(() => null)
-  if (!response.ok) {
-    throw new ApiError(
-      typeof result?.error?.message === 'string'
-        ? result.error.message
-        : `O servidor respondeu com o código ${response.status}.`,
-      response.status,
-    )
-  }
-  if (!result || !Object.hasOwn(result, 'data')) {
-    throw new Error('O servidor não retornou uma resposta válida.')
-  }
-  return result.data as T
 }
 function errorText(error: unknown) {
   return error instanceof Error
@@ -1294,7 +1209,15 @@ function Accounts({
     </>
   )
 }
-export function OperationalPage() {
+export function OperationalPage({
+  mode = 'persisted',
+}: {
+  mode?: 'persisted' | 'demo'
+}) {
+  const demo = mode === 'demo'
+  const [api] = useState<OperationalClient>(() =>
+    demo ? createDemoClient() : persistedApi,
+  )
   const [session, setSession] = useState<Session | null>(null)
   const [checkedSession, setCheckedSession] = useState(false)
   const [records, setRecords] = useState<Records>(emptyRecords)
@@ -1311,22 +1234,25 @@ export function OperationalPage() {
     setShowPassword(false)
     pendingRequests.current.clear()
   }, [])
-  const reload = useCallback(async (current: Session) => {
-    if (current.user.role === 'reader') return
-    const epoch = sessionEpoch.current
-    const [readers, works, copies, loans, events, users] = await Promise.all([
-      api<Reader[]>('/readers'),
-      api<Work[]>('/works'),
-      api<Copy[]>('/copies'),
-      api<Loan[]>('/loans'),
-      api<Event[]>('/history'),
-      current.user.role === 'admin'
-        ? api<User[]>('/users')
-        : Promise.resolve([]),
-    ])
-    if (epoch === sessionEpoch.current)
-      setRecords({ readers, works, copies, loans, events, users })
-  }, [])
+  const reload = useCallback(
+    async (current: Session) => {
+      if (current.user.role === 'reader') return
+      const epoch = sessionEpoch.current
+      const [readers, works, copies, loans, events, users] = await Promise.all([
+        api<Reader[]>('/readers'),
+        api<Work[]>('/works'),
+        api<Copy[]>('/copies'),
+        api<Loan[]>('/loans'),
+        api<Event[]>('/history'),
+        current.user.role === 'admin'
+          ? api<User[]>('/users')
+          : Promise.resolve([]),
+      ])
+      if (epoch === sessionEpoch.current)
+        setRecords({ readers, works, copies, loans, events, users })
+    },
+    [api],
+  )
   useEffect(() => {
     let alive = true
     void api<Session>('/auth/session')
@@ -1346,7 +1272,7 @@ export function OperationalPage() {
     return () => {
       alive = false
     }
-  }, [expire, reload])
+  }, [api, expire, reload])
   const save: Save = async (
     path,
     body,
@@ -1357,6 +1283,7 @@ export function OperationalPage() {
     if (!session || busy) return false
     setBusy(true)
     setNotice(null)
+    const confirmation = demo ? `Simulação: ${message}` : message
     const fingerprint = `${path}:${JSON.stringify(body)}`
     let requestId: string | undefined
     if (idempotent) {
@@ -1372,7 +1299,7 @@ export function OperationalPage() {
         session.csrfToken,
       )
       pendingRequests.current.delete(fingerprint)
-      setNotice({ kind: 'success', text: message })
+      setNotice({ kind: 'success', text: confirmation })
       try {
         await reload(session)
       } catch (error) {
@@ -1380,12 +1307,12 @@ export function OperationalPage() {
           expire()
           setNotice({
             kind: 'success',
-            text: `${message} Entre novamente para continuar.`,
+            text: `${confirmation} Entre novamente para continuar.`,
           })
         } else
           setNotice({
             kind: 'error',
-            text: `${message} A atualização da lista falhou: ${errorText(error)} Use Atualizar dados antes de continuar.`,
+            text: `${confirmation} A atualização da lista falhou: ${errorText(error)} Use Atualizar dados antes de continuar.`,
           })
       }
       return true
@@ -1393,7 +1320,7 @@ export function OperationalPage() {
       if (error instanceof ApiError && error.status === 401) expire()
       setNotice({
         kind: 'error',
-        text: `${errorText(error)}${error instanceof ApiError ? '' : ' A resposta não confirmou a gravação. Em circulação, repetir os mesmos dados preserva o identificador da solicitação.'}`,
+        text: `${errorText(error)}${demo || error instanceof ApiError ? '' : ' A resposta não confirmou a gravação. Em circulação, repetir os mesmos dados preserva o identificador da solicitação.'}`,
       })
       return false
     } finally {
@@ -1430,7 +1357,10 @@ export function OperationalPage() {
     try {
       await api('/auth/logout', 'POST', {}, session.csrfToken)
       expire()
-      setNotice({ kind: 'success', text: 'Sessão encerrada.' })
+      setNotice({
+        kind: 'success',
+        text: demo ? 'Acesso de teste encerrado.' : 'Sessão encerrada.',
+      })
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) expire()
       setNotice({ kind: 'error', text: errorText(error) })
@@ -1473,19 +1403,39 @@ export function OperationalPage() {
       <header className="op-header">
         <div className="op-heading">
           <p>Biblioteca Pública Municipal de Cianorte</p>
-          <h1>Atendimento</h1>
+          <h1>{demo ? 'Atendimento de teste' : 'Atendimento'}</h1>
           <p className="op-environment">
-            Dados fictícios persistidos · Ambiente de testes
+            {demo
+              ? 'Demonstração · Dados temporários'
+              : 'Dados fictícios persistidos · Ambiente de testes'}
           </p>
         </div>
-        <a className="op-button secondary" href="#dashboard">
-          Abrir demonstração
-        </a>
+        <div className="op-actions">
+          {demo && (
+            <a className="op-button secondary" href="#atendimento">
+              Atendimento com banco
+            </a>
+          )}
+          <a className="op-button secondary" href="#dashboard">
+            {demo ? 'Voltar ao painel' : 'Abrir demonstração'}
+          </a>
+        </div>
       </header>
       <p className="op-note">
-        Cadastros e operações desta área são gravados no banco do sistema.
-        Utilize somente dados fictícios. O ambiente depende do servidor
-        operacional em execução.
+        {demo ? (
+          <>
+            Este é um teste público com dados fictícios. Cadastros, empréstimos,
+            devoluções e renovações são simulados neste navegador e descartados
+            ao recarregar a página ou sair desta área. Não insira dados
+            pessoais.
+          </>
+        ) : (
+          <>
+            Cadastros e operações desta área são gravados no banco do sistema.
+            Utilize somente dados fictícios. O ambiente depende do servidor
+            operacional em execução.
+          </>
+        )}
       </p>
       {notice && (
         <div
@@ -1498,16 +1448,40 @@ export function OperationalPage() {
       {!checkedSession && <p role="status">Verificando sessão…</p>}
       {checkedSession && !session && (
         <section className="op-login" aria-label="Acesso ao atendimento">
-          <h2>Entrar no atendimento</h2>
-          <p>
-            Use a conta criada na configuração do sistema. Não existe senha
-            padrão.
-          </p>
+          <h2>
+            {demo ? 'Entrar no atendimento de teste' : 'Entrar no atendimento'}
+          </h2>
+          {demo ? (
+            <>
+              <p>
+                Use o acesso público de exemplo para experimentar o atendimento.
+              </p>
+              <p className="op-demo-access">
+                Usuário de exemplo: <strong>{PUBLIC_DEMO_USERNAME}</strong>
+                <br />
+                Senha de exemplo: <strong>{PUBLIC_DEMO_PASSWORD}</strong>
+              </p>
+            </>
+          ) : (
+            <>
+              <p>
+                Use a conta criada na configuração do sistema. Não existe senha
+                padrão para este banco.
+              </p>
+              <p>Para experimentar sem servidor e sem salvar informações:</p>
+              <p>
+                <a className="op-button secondary" href="#atendimento-teste">
+                  Abrir atendimento de teste
+                </a>
+              </p>
+            </>
+          )}
           <form className="op-form" onSubmit={login}>
             <fieldset disabled={busy}>
               <Field label="Usuário">
                 <input
                   name="username"
+                  defaultValue={demo ? PUBLIC_DEMO_USERNAME : undefined}
                   required
                   autoComplete="username"
                   maxLength={80}
@@ -1536,15 +1510,17 @@ export function OperationalPage() {
               <strong>{session.user.name}</strong> · {label(session.user.role)}
             </p>
             <div className="op-actions">
-              <button
-                type="button"
-                className="op-button secondary"
-                disabled={busy}
-                onClick={() => setShowPassword((value) => !value)}
-                aria-expanded={showPassword}
-              >
-                Trocar senha
-              </button>
+              {!demo && (
+                <button
+                  type="button"
+                  className="op-button secondary"
+                  disabled={busy}
+                  onClick={() => setShowPassword((value) => !value)}
+                  aria-expanded={showPassword}
+                >
+                  Trocar senha
+                </button>
+              )}
               <button
                 type="button"
                 className="op-button secondary"
@@ -1557,7 +1533,7 @@ export function OperationalPage() {
               </button>
             </div>
           </div>
-          {showPassword && (
+          {!demo && showPassword && (
             <Panel title="Trocar minha senha">
               <form className="op-form" onSubmit={changePassword}>
                 <fieldset disabled={busy}>
@@ -1625,7 +1601,12 @@ export function OperationalPage() {
                     setNotice(null)
                     try {
                       await reload(session)
-                      setNotice({ kind: 'success', text: 'Dados atualizados.' })
+                      setNotice({
+                        kind: 'success',
+                        text: demo
+                          ? 'Dados temporários atualizados.'
+                          : 'Dados atualizados.',
+                      })
                     } catch (error) {
                       if (error instanceof ApiError && error.status === 401)
                         expire()
