@@ -1,6 +1,6 @@
 # Entrega operacional — atualização de 20/10/2026
 
-Esta entrega acrescenta atendimento com gravação em SQLite à aplicação existente. O código está salvo no GitHub. A segunda execução remota aprovou instalação, lint, tipos, build, 90 testes do servidor e 34 testes de navegador. A formatação final é conferida pelo CI. Use somente dados fictícios; homologação institucional e uso real permanecem pendentes.
+Esta entrega acrescenta atendimento com gravação em SQLite à aplicação existente. O código está salvo no GitHub. A validação remota aprovou instalação, formatação, lint, tipos, build, 102 testes do servidor, 34 execuções de navegador e o ensaio de persistência e recuperação em container. Use somente dados fictícios; homologação institucional e uso real permanecem pendentes.
 
 ## Origem e situação do trabalho
 
@@ -40,7 +40,7 @@ Não existe importador de planilha nesta etapa. Títulos repetidos permanecem po
 ## Demonstração e atendimento persistido
 
 - `/#dashboard` e os demais módulos da demonstração continuam usando os dados fictícios originais. Busca, filtros, paginação, detalhes e exportação demonstrativa permanecem nessa área.
-- `/#atendimento` utiliza a API e o SQLite local. A interface identifica os registros como **dados fictícios persistidos**. O banco começa sem leitores, obras, exemplares ou empréstimos; a inicialização cria apenas a administração solicitada no terminal.
+- `/#atendimento` utiliza a API e o SQLite local. A interface identifica os registros como **dados fictícios persistidos**, em ambiente de testes. O banco começa sem leitores, obras, exemplares ou empréstimos; a inicialização cria apenas a administração solicitada no terminal.
 - As áreas não compartilham registros. Criar um leitor no atendimento não altera os números da demonstração, e exportar o resumo demonstrativo não gera um backup do banco.
 - O atendimento só informa sucesso quando a API confirma a operação. Falhas de gravação e conflitos são apresentados ao operador. Falha na atualização da lista após uma gravação confirmada também é informada.
 
@@ -60,13 +60,14 @@ npm start
 
 `init` solicita usuário, nome fictício e senha administrativa no terminal. A senha precisa ter entre 12 e 128 caracteres, incluindo letras e números, e não é exibida durante a digitação. Não existe senha administrativa padrão. A inicialização recusa criar outra administração inicial se o banco já tiver sido inicializado.
 
-Com o exemplo de configuração, abra `http://localhost:3001/#atendimento`. O servidor aceita apenas `127.0.0.1` ou `::1` como endereço de escuta; o padrão é loopback IPv4. Mantenha o terminal do servidor aberto durante o atendimento.
+Com o exemplo de configuração, abra `http://localhost:3001/#atendimento`. No perfil local, o servidor aceita apenas `127.0.0.1` ou `::1` como endereço de escuta; o padrão é loopback IPv4. Mantenha o terminal do servidor aberto durante o atendimento.
 
 ### Configuração de exemplo
 
 O arquivo `.env.example` contém:
 
 ```dotenv
+LIBRARY_MODE=local
 LIBRARY_DB_PATH=.library-data/library.sqlite
 LIBRARY_HOST=127.0.0.1
 LIBRARY_PORT=3001
@@ -135,27 +136,30 @@ Nesse ensaio pequeno e fictício, o backup levou 64 ms, a restauração 67 ms e 
 
 ## Validação executada
 
-A [primeira execução](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39265878427) aprovou instalação, lint, tipos, build e 89 testes do servidor. Passaram 32 de 34 testes de navegador. As duas falhas identificaram a mesma alteração de grafia: NFKC convertia `2ª edição` em `2a edição`. A correção usa NFC nos campos descritivos e mantém NFKC para identificação de tombos, com teste de regressão.
+A [execução de validação da hospedagem](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39444000612), no commit `6eaf55255f0dd153c19bcb0f6571be02288ae8b6`, aprovou:
 
-A [segunda execução](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39273011180), no commit `2bea619a38c970007cc63b025043d24412b11999`, aprovou:
+| Verificação                                    | Resultado                            |
+| ---------------------------------------------- | ------------------------------------ |
+| Instalação, formatação, lint, tipos e build    | Aprovados                            |
+| Servidor                                       | 102 aprovados, 0 falhas, 0 ignorados |
+| Chromium desktop e emulação móvel              | 34 aprovados, 0 falhas               |
+| Imagens Docker da API e do proxy               | Construídas                          |
+| Configuração Compose e Caddy                   | Interpretada sem erro                |
+| Operações, reinício e recuperação em container | Aprovados com dados fictícios        |
 
-| Verificação                       | Resultado                             |
-| --------------------------------- | ------------------------------------- |
-| Instalação, lint, tipos e build   | Aprovados                             |
-| Servidor                          | 90 aprovados, 0 falhas                |
-| Chromium desktop e emulação móvel | 34 aprovados, 0 falhas, 26,7 segundos |
+Os testes nativos incluem 32 casos SQLite, 18 de autenticação, 7 de API, 24 de backup, 4 de CLI e 17 de configuração. Verificam disputa transacional entre conexões, rollback, indisponibilidade, dados inválidos, versões concorrentes, histórico, permissões e recuperação. Os 12 novos casos de configuração cobrem perfis local e hospedado, portas, HTTPS, cookies seguros, origem e caminho explícito do banco.
 
-Essa execução reprovou somente a formatação de dois arquivos. O CI gera as correções exatas do Prettier e exige aprovação de todas as etapas. A conferência final está nas [execuções atuais desta branch](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions?query=branch%3Acodex%2Freconstrucao-operacional).
+Os 12 cenários originais e os 5 operacionais são executados em dois projetos Chromium: 34 execuções. Cobrem cadastro, edição, empréstimo de dois exemplares, devolução parcial, renovação, recarga, histórico, acesso permitido e negado, teclado, axe e larguras de 320, 390 e 1440 pixels, com API real e banco temporário fictício. A configuração utiliza pt-BR e America/Sao_Paulo.
 
-Os testes nativos incluem 32 casos SQLite, 18 de autenticação, 7 de API, 24 de backup, 4 de CLI e 5 de configuração. Verificam disputa entre conexões, rollback, indisponibilidade, dados inválidos, versões concorrentes, histórico, permissões e recuperação.
+O ensaio Docker usa a imagem real da API, usuário sem root, filesystem somente leitura e volumes próprios da execução. Verifica permissões de arquivos, origem e CSRF, bloqueio de acesso, cadastros e edições, conflito de versão, empréstimo exclusivo e idempotente, devolução parcial e renovação. Reinicia o container e compara registros, sessões e histórico. Cria e valida backup criptografado e restaura outro arquivo, conferindo conteúdo e revogação de sessões apenas na cópia.
 
-Os 12 cenários originais e os 5 novos, em dois projetos Chromium, totalizam 34 testes de navegador. A segunda rodada aprovou cadastro, edição, empréstimo de dois exemplares, devolução parcial, renovação, recarga, histórico, acesso permitido e negado, teclado, axe e larguras de 320, 390 e 1440 pixels, usando API real e banco temporário fictício. A configuração utiliza `pt-BR` e `America/Sao_Paulo`.
+Esse ensaio utiliza HTTP local e envia cookies manualmente. Confere o atributo Secure no cabeçalho, mas não valida certificado público, DNS, navegador pela cadeia Vercel–API ou persistência no futuro servidor. Essas etapas permanecem pendentes. Consulte [HOSPEDAGEM.md](HOSPEDAGEM.md).
 
-Foram inspecionadas capturas de leitores, circulação e histórico em desktop e largura móvel. A revisão amostral confirmou leitura e organização nessas imagens. Os artefatos Playwright da execução têm retenção de sete dias e podem ser reproduzidos pelos testes. Emulação móvel e capturas não substituem testes em aparelho físico ou homologação com a equipe.
+Capturas anteriores de leitores, circulação e histórico foram inspecionadas em desktop e largura móvel; a evidência está na execução 39438201882. Os artefatos Playwright têm retenção de sete dias. Não houve teste em aparelho físico nem homologação com a equipe.
 
-[VALIDACAO_TECNICA.json](VALIDACAO_TECNICA.json) registra as evidências atuais; [TESTES_SERVIDOR.txt](TESTES_SERVIDOR.txt) contém a saída dos 90 testes. O resultado local de 89 testes de 18/10 foi preservado separadamente em [VALIDACAO_LOCAL_2026-10-18.json](VALIDACAO_LOCAL_2026-10-18.json). A contagem anterior de 59 testes não foi reutilizada.
+[VALIDACAO_TECNICA.json](VALIDACAO_TECNICA.json) registra os resultados atuais. [TESTES_SERVIDOR.txt](TESTES_SERVIDOR.txt) conserva a saída histórica dos 90 testes da base anterior; a execução atual dos 102 está nos logs do CI. O resultado local de 89 testes foi preservado em [VALIDACAO_LOCAL_2026-10-18.json](VALIDACAO_LOCAL_2026-10-18.json). A contagem anterior de 59 não foi reutilizada.
 
-O ambiente local reiniciou durante o fechamento e permaneceu indisponível. O código e as evidências já estavam preservados no GitHub; a conclusão prossegue pelo CI existente. Os resultados remotos não significam que as restrições locais de rede e portas tenham sido removidas.
+O ambiente local ficou indisponível durante o fechamento. A validação foi concluída no GitHub Actions; isso não significa que as restrições locais tenham sido removidas.
 
 Para reproduzir com Node.js 24 e dependências disponíveis:
 
@@ -170,14 +174,14 @@ npx playwright install chromium
 npm test
 ```
 
-O Playwright inicia `tests/start-server.mjs` em `127.0.0.1:4173` com banco temporário próprio. Contas fixas existem somente nessa fixture; o servidor normal não cria senhas padrão. `bash scripts/validate-local.sh` instala dependências, aplica Prettier e executa as verificações; revise o diff.
+O Playwright inicia tests/start-server.mjs em 127.0.0.1:4173 com banco temporário próprio. Contas fixas existem somente nessa fixture; o servidor normal não cria senhas padrão. A receita do ensaio Docker está no job container de .github/workflows/ci.yml e restringe as operações a recursos com nomes de teste.
 
 ## Pendências institucionais
 
 1. Homologar o atendimento com a equipe e conferir os aparelhos e navegadores usados na biblioteca.
 2. Recuperar os anexos e mapear os IDs reais do backlog, sem presumir identificadores.
 3. Aprovar regras de circulação, tombos, acesso, retenção e recuperação.
-4. Aprovar hospedagem com processo Node.js e disco persistente. A publicação Vercel existente continua demonstrativa.
+4. Definir e aprovar servidor com disco persistente, domínio da API e acessos. O pacote Docker e o exemplo de rewrite estão preparados e validados no CI, mas não foram implantados. A Vercel existente continua demonstrativa.
 5. Preparar migração real somente com aprovação específica, validação, relatório, simulação e preservação da origem. Não eliminar títulos repetidos ou transformar IDs provisórios em tombos.
 
 Não houve merge ou publicação em produção.

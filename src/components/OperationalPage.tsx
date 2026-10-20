@@ -1474,7 +1474,7 @@ export function OperationalPage() {
         <div className="op-heading">
           <p>Biblioteca Pública Municipal de Cianorte</p>
           <h1>Atendimento</h1>
-          <p className="op-environment">Dados fictícios · Ambiente de testes</p>
+          <p className="op-environment">Dados fictícios persistidos · Ambiente de testes</p>
         </div>
         <a className="op-button secondary" href="#dashboard">
           Abrir demonstração

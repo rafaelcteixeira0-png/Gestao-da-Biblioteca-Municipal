@@ -18,7 +18,7 @@ O modo hosted exige origem HTTPS explícita, cookies seguros e caminho absoluto 
 
 ## Evidências e pendências
 
-A [base operacional validada](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39438201882) aprovou instalação, formatação, lint, tipos, build, 90 testes do servidor e 34 execuções de navegador. As alterações desta preparação devem passar também pelo CI da branch, com os testes adicionais de configuração e container. Consulte [VALIDACAO_TECNICA.json](VALIDACAO_TECNICA.json) para o resultado registrado.
+A [base operacional validada](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39438201882) aprovou instalação, formatação, lint, tipos, build, 90 testes do servidor e 34 execuções de navegador. A [validação da hospedagem](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39444000612) aprovou também os novos casos de configuração (102 testes nativos no total), 34 execuções de navegador e o ensaio de persistência e recuperação em container. Consulte [VALIDACAO_TECNICA.json](VALIDACAO_TECNICA.json) para o resultado registrado.
 
 O teste de container usa dados fictícios e HTTP local: confere o atributo Secure do cookie, permissões, operações da API, persistência após reinício e recuperação isolada. Não comprova emissão real de certificado, DNS ou integração Vercel–API. O ambiente local do Codex está indisponível; os resultados executados são os do CI, quando registrados como aprovados.
 

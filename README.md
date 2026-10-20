@@ -8,7 +8,7 @@ O atendimento permite criar e editar leitores, obras e exemplares; registrar emp
 
 Consulte [a entrega operacional e suas limitações](docs/ENTREGA_OPERACIONAL.md) e [o resultado de recuperação com dados fictícios](docs/RECUPERACAO.json). A publicação Vercel existente continua sendo a demonstração: este servidor SQLite requer um processo Node.js com disco persistente e não foi publicado.
 
-O código e as etapas estão na branch [`codex/reconstrucao-operacional`](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/tree/codex/reconstrucao-operacional). O CI aprovou 90 testes do servidor, 34 de navegador, lint, tipos e build. Consulte [os resultados e a conferência final](docs/ENTREGA_OPERACIONAL.md) e [o registro do envio](docs/ENVIO_GITHUB.md).
+O código e as etapas estão na branch [`codex/reconstrucao-operacional`](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/tree/codex/reconstrucao-operacional). O CI aprovou 102 testes do servidor, 34 execuções de navegador, formatação, lint, tipos, build e o ensaio de persistência e recuperação em container. Consulte [os resultados e a conferência final](docs/ENTREGA_OPERACIONAL.md) e [o registro do envio](docs/ENVIO_GITHUB.md).
 
 ## O que pode ser revisado no navegador
 
