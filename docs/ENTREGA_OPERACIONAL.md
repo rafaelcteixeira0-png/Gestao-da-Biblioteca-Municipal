@@ -1,16 +1,16 @@
-# Entrega operacional local — reconstrução de 18/10/2026
+# Entrega operacional — atualização de 20/10/2026
 
-Esta entrega acrescenta atendimento com gravação em SQLite à aplicação existente. O ambiente é exclusivamente local e utiliza dados fictícios. A validação da interface continua pendente enquanto as dependências de desenvolvimento não estiverem disponíveis. Existe Chromium instalado, mas falta o executor de testes do projeto.
+Esta entrega acrescenta atendimento com gravação em SQLite à aplicação existente. O código está salvo no GitHub. A segunda execução remota aprovou instalação, lint, tipos, build, 90 testes do servidor e 34 testes de navegador. A formatação final é conferida pelo CI. Use somente dados fictícios; homologação institucional e uso real permanecem pendentes.
 
 ## Origem e situação do trabalho
 
-O repositório público foi recuperado a partir do commit `2f39c4054ea49173839b65ef34a2ab1845c13678`. Os 34 arquivos originais, incluindo imagens, foram verificados pelos identificadores Git; a árvore original é `44b6b536c8dc20204f4cf2a671c3655be15d7b96`. O trabalho atual está na branch local `codex/reconstrucao-operacional`.
+O repositório público foi recuperado a partir do commit `2f39c4054ea49173839b65ef34a2ab1845c13678`. Os 34 arquivos originais, incluindo imagens, foram verificados pelos identificadores Git; a árvore original é `44b6b536c8dc20204f4cf2a671c3655be15d7b96`. O trabalho atual está na branch `codex/reconstrucao-operacional`, enviada após autorização.
 
 As entregas operacionais e os commits locais mencionados anteriormente na conversa não estavam presentes neste ambiente. A implementação aqui documentada foi reconstruída sobre o código público recuperado. Os documentos originais do repositório foram preservados e descrevem a etapa anterior de demonstração; este documento registra o incremento operacional atual.
 
 Os anexos `Auditoria_Biblioteca_Cianorte.pdf`, `Auditoria_Biblioteca_Cianorte.md`, `Planejamento_Biblioteca_Cianorte.xlsx` e `Backlog_Codex_Biblioteca.md` não estão disponíveis neste ambiente. O mapeamento para os identificadores reais das tarefas do backlog está pendente de recuperação desses documentos. Nenhum identificador foi presumido.
 
-Não houve importação ou migração de dados reais, exclusão de registros institucionais, contratação de serviços, push, merge ou publicação em produção.
+O usuário autorizou o envio da branch ao GitHub. O repositório foi renomeado para `rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal`, mantendo o ID `1417588503`. Não houve migração de dados reais, exclusão institucional, contratação de serviços, merge ou publicação em produção.
 
 ## Comportamento implementado
 
@@ -133,50 +133,51 @@ O arquivo [RECUPERACAO.json](RECUPERACAO.json) registra um novo ensaio local com
 
 Nesse ensaio pequeno e fictício, o backup levou 64 ms, a restauração 67 ms e a restauração com login 123 ms. Esses valores descrevem apenas a execução registrada neste ambiente. Não medem a rede, o equipamento ou o volume de dados da biblioteca e não estabelecem RPO ou RTO institucionais. Frequência, retenção, destino separado, responsáveis e objetivos de recuperação ainda precisam ser definidos.
 
-## Validação nesta reconstrução
+## Validação executada
 
-**89 testes nativos do servidor aprovados nesta reconstrução, sem falhas ou testes ignorados.** São 31 de domínio/SQLite, 18 de autenticação, 7 da API, 24 de backup, 4 da CLI e 5 de configuração. Incluem sucesso, exemplar indisponível, dados inválidos, conflitos de versão, histórico preservado, acesso permitido e negado, revogação de sessões e recuperação em arquivo separado. A disputa de empréstimo usa duas conexões em workers; a API foi exercitada por objetos Request/Response, sem abrir uma porta HTTP neste ambiente.
+A [primeira execução](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39265878427) aprovou instalação, lint, tipos, build e 89 testes do servidor. Passaram 32 de 34 testes de navegador. As duas falhas identificaram a mesma alteração de grafia: NFKC convertia `2ª edição` em `2a edição`. A correção usa NFC nos campos descritivos e mantém NFKC para identificação de tombos, com teste de regressão.
 
-| Verificação                                 | Situação deste registro                                                                                                      |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Testes nativos: `npm run test:server`       | 89 aprovados, 0 falhas, 0 ignorados.                                                                                         |
-| Sintaxe Node: `node --check`                | Todos os arquivos MJS de servidor e testes aprovados.                                                                        |
-| Script: `bash -n scripts/validate-local.sh` | Aprovado.                                                                                                                    |
-| Whitespace: `git diff --check`              | Aprovado.                                                                                                                    |
-| Tipos: `npm run typecheck`                  | Tentativa encerrou com código 127: `tsc: not found`.                                                                         |
-| Lint: `npm run lint`                        | Tentativa encerrou com código 127: `eslint: not found`.                                                                      |
-| Formatação: `npm run format:check`          | Tentativa encerrou com código 127: `prettier: not found`.                                                                    |
-| Build: `npm run build`                      | Tentativa encerrou com código 127: `tsc: not found`.                                                                         |
-| Playwright: `npm test`                      | Não executou testes: sem `@playwright/test`, encontrou CLI Python global e encerrou com `unknown command 'test'` (código 1). |
+A [segunda execução](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39273011180), no commit `2bea619a38c970007cc63b025043d24412b11999`, aprovou:
 
-As tentativas de obter permissão para instalar dependências não receberam resposta antes de serem encerradas de forma limitada; não houve aprovação nem rejeição automática explícita. `node_modules` permanece ausente. A execução normal do sandbox bloqueou rede e abertura de porta local com `EPERM`. Esses impedimentos não são resultados aprovados dos checks. O CI foi preparado para executar cada verificação, guardar sugestões de formatação e reprovar a execução se qualquer etapa falhar. Seu uso com esta branch depende da autorização de push, ainda não recebida no momento deste registro.
+| Verificação | Resultado |
+| --- | --- |
+| Instalação, lint, tipos e build | Aprovados |
+| Servidor | 90 aprovados, 0 falhas |
+| Chromium desktop e emulação móvel | 34 aprovados, 0 falhas, 26,7 segundos |
 
-Os novos testes em `tests/operational.spec.ts` usam o servidor real e banco temporário fictício, sem mocks. Cobrem o fluxo administrativo de cadastro, edição, empréstimo de dois exemplares, devolução parcial, renovação, recarga e histórico; negação ao perfil leitor; atendimento autorizado com administração de contas negada; validação e concorrência; teclado, axe e larguras de 320, 390 e 1440 pixels. Estão configurados projetos desktop e mobile com Chromium. A existência dos testes não significa que esses cenários de navegador já passaram. As configurações mobile emulam um navegador e não substituem teste em aparelho físico.
+Essa execução reprovou somente a formatação de dois arquivos. O CI gera as correções exatas do Prettier e exige aprovação de todas as etapas. A conferência final está nas [execuções atuais desta branch](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions?query=branch%3Acodex%2Freconstrucao-operacional).
 
-O resumo dos comandos efetivamente executados está em [VALIDACAO_TECNICA.json](VALIDACAO_TECNICA.json); a saída completa da suíte nativa está em [TESTES_SERVIDOR.txt](TESTES_SERVIDOR.txt). Esses registros pertencem a esta reconstrução e não reutilizam a contagem de 59 testes de uma execução anterior.
+Os testes nativos incluem 32 casos SQLite, 18 de autenticação, 7 de API, 24 de backup, 4 de CLI e 5 de configuração. Verificam disputa entre conexões, rollback, indisponibilidade, dados inválidos, versões concorrentes, histórico, permissões e recuperação.
 
-Para executar as verificações quando as dependências estiverem disponíveis:
+Os 12 cenários originais e os 5 novos, em dois projetos Chromium, totalizam 34 testes de navegador. A segunda rodada aprovou cadastro, edição, empréstimo de dois exemplares, devolução parcial, renovação, recarga, histórico, acesso permitido e negado, teclado, axe e larguras de 320, 390 e 1440 pixels, usando API real e banco temporário fictício. A configuração utiliza `pt-BR` e `America/Sao_Paulo`.
+
+Foram inspecionadas capturas de leitores, circulação e histórico em desktop e largura móvel. A revisão amostral confirmou leitura e organização nessas imagens. Os artefatos Playwright da execução têm retenção de sete dias e podem ser reproduzidos pelos testes. Emulação móvel e capturas não substituem testes em aparelho físico ou homologação com a equipe.
+
+[VALIDACAO_TECNICA.json](VALIDACAO_TECNICA.json) registra as evidências atuais; [TESTES_SERVIDOR.txt](TESTES_SERVIDOR.txt) contém a saída dos 90 testes. O resultado local de 89 testes de 18/10 foi preservado separadamente em [VALIDACAO_LOCAL_2026-10-18.json](VALIDACAO_LOCAL_2026-10-18.json). A contagem anterior de 59 testes não foi reutilizada.
+
+O ambiente local reiniciou durante o fechamento e permaneceu indisponível. O código e as evidências já estavam preservados no GitHub; a conclusão prossegue pelo CI existente. Os resultados remotos não significam que as restrições locais de rede e portas tenham sido removidas.
+
+Para reproduzir com Node.js 24 e dependências disponíveis:
 
 ```bash
-npm run test:server
-npm run typecheck
-npm run lint
+npm ci
 npm run format:check
+npm run lint
+npm run typecheck
+npm run test:server
 npm run build
 npx playwright install chromium
 npm test
 ```
 
-O Playwright inicia `tests/start-server.mjs` em `127.0.0.1:4173` com banco temporário próprio. As contas e senhas fixas dessa fixture existem apenas nos testes; o início normal da aplicação não as cria. O relatório fica em `playwright-report/`, e os artefatos de falhas ficam em `test-results/`. Esses diretórios não são versionados.
+O Playwright inicia `tests/start-server.mjs` em `127.0.0.1:4173` com banco temporário próprio. Contas fixas existem somente nessa fixture; o servidor normal não cria senhas padrão. `bash scripts/validate-local.sh` instala dependências, aplica Prettier e executa as verificações; revise o diff.
 
-`bash scripts/validate-local.sh` instala dependências e executa a sequência completa localmente, usando Chromium instalado quando disponível. O script aplica Prettier antes dos checks; revise o diff resultante. A análise de tipos abrange também os arquivos `tests/*.spec.ts`. Os 12 cenários de interface originais foram preservados; com os 5 novos e os dois projetos de navegador, há 34 execuções previstas, ainda não realizadas nesta reconstrução. A suíte prepara capturas do atendimento para revisão visual posterior; nenhuma captura foi produzida ou inspecionada nesta execução.
+## Pendências institucionais
 
-## Pendências e próxima etapa
+1. Homologar o atendimento com a equipe e conferir os aparelhos e navegadores usados na biblioteca.
+2. Recuperar os anexos e mapear os IDs reais do backlog, sem presumir identificadores.
+3. Aprovar regras de circulação, tombos, acesso, retenção e recuperação.
+4. Aprovar hospedagem com processo Node.js e disco persistente. A publicação Vercel existente continua demonstrativa.
+5. Preparar migração real somente com aprovação específica, validação, relatório, simulação e preservação da origem. Não eliminar títulos repetidos ou transformar IDs provisórios em tombos.
 
-1. Concluir tipos, lint, formatação, build e navegador; corrigir eventuais falhas e atualizar este registro com resultados efetivamente executados.
-2. Revisar visualmente e com atendimento assistido os formulários, seleção de exemplares, devolução parcial e renovação. A interface foi implementada em português brasileiro; a homologação visual permanece pendente.
-3. Recuperar os anexos para mapear esta entrega aos identificadores reais do backlog e registrar o aceite de cada tarefa sem marcar preparação como conclusão.
-4. Aprovar regras de circulação, identificação oficial dos exemplares, acesso, retenção e recuperação. Definir infraestrutura institucional antes de qualquer exposição externa; este servidor local não configura a hospedagem Vercel existente para persistir SQLite.
-5. Somente após aprovação específica, preparar a migração real com validação, relatório de inconsistências, simulação e preservação da origem. Nenhuma exclusão automática de títulos repetidos ou atribuição de tombos oficiais está autorizada por esta entrega.
-
-O núcleo local está implementado e os testes nativos registram validação do servidor. A conclusão da validação técnica e o aceite do atendimento no navegador continuam necessários antes de considerar os cinco pontos integralmente homologados.
+Não houve merge ou publicação em produção.

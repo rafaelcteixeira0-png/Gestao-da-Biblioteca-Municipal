@@ -1,0 +1,72 @@
+{
+  "executedAt": "2026-10-18T01:48:20.711Z",
+  "node": "v24.19.0",
+  "branch": "codex/reconstrucao-operacional",
+  "dataset": "fictional-local",
+  "serverTests": {
+    "command": "npm run test:server",
+    "total": 89,
+    "passed": 89,
+    "failed": 0,
+    "skipped": 0,
+    "files": {
+      "library": 31,
+      "auth": 18,
+      "api": 7,
+      "backup": 24,
+      "cli": 4,
+      "config": 5
+    },
+    "evidence": "TESTES_SERVIDOR.txt",
+    "apiTransport": "in-process Request/Response; no live socket"
+  },
+  "passedChecks": [
+    "node --check server/*.mjs and tests/*.mjs",
+    "bash -n scripts/validate-local.sh",
+    "git diff --check"
+  ],
+  "blockedChecks": [
+    {
+      "command": "npm run typecheck",
+      "exitCode": 127,
+      "reason": "tsc: not found"
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 127,
+      "reason": "eslint: not found"
+    },
+    {
+      "command": "npm run format:check",
+      "exitCode": 127,
+      "reason": "prettier: not found"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 127,
+      "reason": "tsc: not found"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 1,
+      "reason": "Project @playwright/test absent; global Python CLI reports unknown command 'test'",
+      "browserTestsExecuted": 0
+    }
+  ],
+  "dependencyStatus": {
+    "nodeModulesPresent": false,
+    "sandbox": "Network and local listening port failed with EPERM",
+    "permissionAttempts": "Stopped after bounded waiting; no explicit approval or rejection received",
+    "remoteCI": "Prepared; requires user authorization to push branch"
+  },
+  "visualReview": {
+    "performed": false,
+    "screenshotsProduced": 0
+  },
+  "recoveryEvidence": "RECUPERACAO.json",
+  "production": {
+    "deployed": false,
+    "realDataUsed": false,
+    "migrationPerformed": false
+  }
+}

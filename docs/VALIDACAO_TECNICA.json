@@ -1,70 +1,51 @@
 {
-  "executedAt": "2026-10-18T01:48:20.711Z",
-  "node": "v24.19.0",
+  "updatedAt": "2026-10-20",
+  "repository": "rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal",
   "branch": "codex/reconstrucao-operacional",
   "dataset": "fictional-local",
-  "serverTests": {
-    "command": "npm run test:server",
-    "total": 89,
-    "passed": 89,
-    "failed": 0,
-    "skipped": 0,
-    "files": {
-      "library": 31,
-      "auth": 18,
-      "api": 7,
-      "backup": 24,
-      "cli": 4,
-      "config": 5
-    },
-    "evidence": "TESTES_SERVIDOR.txt",
-    "apiTransport": "in-process Request/Response; no live socket"
+  "evidence": {
+    "runId": 39273011180,
+    "url": "https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39273011180",
+    "commit": "2bea619a38c970007cc63b025043d24412b11999"
   },
-  "passedChecks": [
-    "node --check server/*.mjs and tests/*.mjs",
-    "bash -n scripts/validate-local.sh",
-    "git diff --check"
-  ],
-  "blockedChecks": [
-    {
-      "command": "npm run typecheck",
-      "exitCode": 127,
-      "reason": "tsc: not found"
+  "checks": {
+    "dependencies": "passed",
+    "lint": "passed",
+    "types": "passed",
+    "build": "passed",
+    "server": {
+      "passed": 90,
+      "failed": 0,
+      "skipped": 0
     },
-    {
-      "command": "npm run lint",
-      "exitCode": 127,
-      "reason": "eslint: not found"
+    "browser": {
+      "passed": 34,
+      "failed": 0,
+      "projects": [
+        "desktop Chromium",
+        "mobile Chromium emulation"
+      ]
     },
-    {
-      "command": "npm run format:check",
-      "exitCode": 127,
-      "reason": "prettier: not found"
-    },
-    {
-      "command": "npm run build",
-      "exitCode": 127,
-      "reason": "tsc: not found"
-    },
-    {
-      "command": "npm test",
-      "exitCode": 1,
-      "reason": "Project @playwright/test absent; global Python CLI reports unknown command 'test'",
-      "browserTestsExecuted": 0
-    }
-  ],
-  "dependencyStatus": {
-    "nodeModulesPresent": false,
-    "sandbox": "Network and local listening port failed with EPERM",
-    "permissionAttempts": "Stopped after bounded waiting; no explicit approval or rejection received",
-    "remoteCI": "Prepared; requires user authorization to push branch"
+    "formatting": "Final corrections tracked in branch CI"
   },
   "visualReview": {
-    "performed": false,
-    "screenshotsProduced": 0
+    "performed": true,
+    "areas": [
+      "readers",
+      "circulation",
+      "history"
+    ],
+    "widths": [
+      390,
+      1440
+    ],
+    "physicalDevicesTested": false,
+    "institutionalAcceptance": false
   },
   "recoveryEvidence": "RECUPERACAO.json",
+  "historicalLocalEvidence": "VALIDACAO_LOCAL_2026-10-18.json",
   "production": {
+    "merged": false,
     "deployed": false,
     "realDataUsed": false,
     "migrationPerformed": false

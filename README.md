@@ -8,6 +8,8 @@ O atendimento permite criar e editar leitores, obras e exemplares; registrar emp
 
 Consulte [a entrega operacional e suas limitações](docs/ENTREGA_OPERACIONAL.md) e [o resultado de recuperação com dados fictícios](docs/RECUPERACAO.json). A publicação Vercel existente continua sendo a demonstração: este servidor SQLite requer um processo Node.js com disco persistente e não foi publicado.
 
+O código e as etapas estão na branch [`codex/reconstrucao-operacional`](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/tree/codex/reconstrucao-operacional). O CI aprovou 90 testes do servidor, 34 de navegador, lint, tipos e build. Consulte [os resultados e a conferência final](docs/ENTREGA_OPERACIONAL.md) e [o registro do envio](docs/ENVIO_GITHUB.md).
+
 ## O que pode ser revisado no navegador
 
 - Menu com Dashboard, Empréstimos, Devoluções, Renovações, Reservas, Livros, Leitores, Histórico e Relatórios.
@@ -50,7 +52,9 @@ Se o ambiente já disponibilizar Chromium, é possível selecionar esse executá
 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm test -- --workers=2
 ```
 
-Para conferir a compilação de produção manualmente:
+Para revisar o atendimento com SQLite e autenticação, use `npm start`. `npm run preview` serve apenas a interface compilada e não inicia a API.
+
+Para conferir apenas a interface demonstrativa compilada:
 
 ```bash
 npm run build
