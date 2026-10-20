@@ -4,18 +4,22 @@
   "version": "0.1.0",
   "type": "module",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
+    "api": "node --env-file-if-exists=.env server/start.mjs",
+    "start": "node --env-file-if-exists=.env server/start.mjs",
+    "library": "node --env-file-if-exists=.env server/cli.mjs",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc -b",
     "test": "playwright test",
-    "check": "npm run format:check && npm run lint && npm run build && npm test"
+    "test:server": "node --test --test-isolation=none tests/library.test.mjs tests/auth.test.mjs tests/api.test.mjs tests/backup.test.mjs tests/cli.test.mjs tests/config.test.mjs",
+    "check": "npm run format:check && npm run lint && npm run test:server && npm run build && npm test"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

@@ -21,3 +21,7 @@ test-results/
 *.sql
 backups/
 dados-reais/
+.library-data/
+*.backup
+*.backup.json
+!deploy/.env.hosted.example

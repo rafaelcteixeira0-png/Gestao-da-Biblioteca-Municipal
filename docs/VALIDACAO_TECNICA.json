@@ -1,0 +1,65 @@
+{
+  "updatedAt": "2026-10-20",
+  "repository": "rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal",
+  "branch": "codex/reconstrucao-operacional",
+  "dataset": "fictional-local",
+  "evidence": {
+    "runId": 39444000612,
+    "url": "https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39444000612",
+    "commit": "6eaf55255f0dd153c19bcb0f6571be02288ae8b6"
+  },
+  "checks": {
+    "dependencies": "passed",
+    "lint": "passed",
+    "types": "passed",
+    "build": "passed",
+    "server": {
+      "passed": 102,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "passed": 34,
+      "failed": 0,
+      "projects": ["desktop Chromium", "mobile Chromium emulation"]
+    },
+    "formatting": "passed",
+    "container": {
+      "status": "passed",
+      "checks": [
+        "API and proxy images built",
+        "Compose and Caddy configuration parsed",
+        "non-root user and private persistent volumes",
+        "API permissions, origin and CSRF checks",
+        "create and edit readers, works and copies",
+        "exclusive checkout, partial return and individual renewal",
+        "records, history and session preserved after restart",
+        "encrypted backup and isolated restore with sessions revoked"
+      ]
+    }
+  },
+  "visualReview": {
+    "performed": true,
+    "areas": ["readers", "circulation", "history"],
+    "widths": [390, 1440],
+    "physicalDevicesTested": false,
+    "institutionalAcceptance": false,
+    "evidenceRunId": 39438201882
+  },
+  "recoveryEvidence": "RECUPERACAO.json",
+  "historicalLocalEvidence": "VALIDACAO_LOCAL_2026-10-18.json",
+  "hostingPreparation": {
+    "status": "validated in CI; public deployment pending",
+    "providerSelected": false,
+    "publicDomainConfigured": false,
+    "deployed": false,
+    "externalHttpsTested": false,
+    "vercelApiIntegrationTested": false
+  },
+  "production": {
+    "merged": false,
+    "deployed": false,
+    "realDataUsed": false,
+    "migrationPerformed": false
+  }
+}

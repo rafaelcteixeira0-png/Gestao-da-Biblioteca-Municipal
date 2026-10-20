@@ -1,4 +1,4 @@
-name: Verificações do protótipo
+name: Verificações da biblioteca
 
 on:
   push:
@@ -18,16 +18,104 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run format:check
-      - run: npm run lint
-      - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - run: npm test
+      - id: format
+        run: npm run format:check
+        continue-on-error: true
+      - name: Registrar sugestões de formatação
+        if: steps.format.outcome == 'failure'
+        run: |
+          npm run format
+          git diff --binary > format.patch
+          cat format.patch
+      - id: lint
+        run: npm run lint
+        continue-on-error: true
+      - id: types
+        run: npm run typecheck
+        continue-on-error: true
+      - id: server
+        run: npm run test:server
+        continue-on-error: true
+      - id: build
+        run: npm run build
+        continue-on-error: true
+      - id: browser
+        if: steps.build.outcome == 'success'
+        run: npx playwright install --with-deps chromium
+        continue-on-error: true
+      - id: interface
+        if: steps.build.outcome == 'success' && steps.browser.outcome == 'success'
+        run: npm test
+        continue-on-error: true
+      - name: Guardar formatador para reprodução local
+        if: always()
+        run: |
+          if test -d node_modules/prettier; then
+            tar -czf prettier-runtime.tar.gz -C node_modules prettier
+          fi
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
           name: resultados-playwright
           path: |
+            format.patch
+            prettier-runtime.tar.gz
             playwright-report/
             test-results/
           retention-days: 7
+      - name: Exigir aprovação de todas as verificações
+        if: always()
+        env:
+          FORMAT: ${{ steps.format.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          TYPES: ${{ steps.types.outcome }}
+          SERVER: ${{ steps.server.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          BROWSER: ${{ steps.browser.outcome }}
+          INTERFACE: ${{ steps.interface.outcome }}
+        run: |
+          for result in "$FORMAT" "$LINT" "$TYPES" "$SERVER" "$BUILD" "$BROWSER" "$INTERFACE"; do
+            test "$result" = success || exit 1
+          done
+
+  container:
+    name: API hospedada e recuperação em container
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Construir API e proxy
+        run: |
+          docker build --target api -t biblioteca-api:ci .
+          docker build --target proxy -t biblioteca-proxy:ci .
+      - name: Conferir exemplos de implantação
+        run: |
+          docker compose --env-file deploy/.env.hosted.example -f deploy/compose.yaml --profile https config --quiet
+          docker run --rm -e LIBRARY_API_HOST=api.biblioteca.example --entrypoint caddy biblioteca-proxy:ci adapt --config /etc/caddy/Caddyfile --pretty > /tmp/biblioteca-caddy.json
+      - name: Iniciar API com volumes fictícios exclusivos
+        run: |
+          docker volume create biblioteca-ci-data
+          docker volume create biblioteca-ci-backups
+          docker run -d --name biblioteca-ci --read-only --tmpfs /tmp:rw,nosuid,noexec,size=64m,mode=1777 \
+            --cap-drop ALL --security-opt no-new-privileges:true \
+            -p 127.0.0.1:4301:3001 \
+            -e LIBRARY_MODE=hosted -e LIBRARY_HOST=0.0.0.0 -e LIBRARY_PORT=3001 \
+            -e LIBRARY_ORIGIN=https://biblioteca.example -e LIBRARY_COOKIE_SECURE=true \
+            -e LIBRARY_DB_PATH=/data/library.sqlite \
+            -v biblioteca-ci-data:/data -v biblioteca-ci-backups:/backups biblioteca-api:ci
+      - name: Verificar operações, reinício e recuperação
+        env:
+          LIBRARY_TEST_CONTAINER: biblioteca-ci
+          LIBRARY_TEST_URL: http://127.0.0.1:4301
+        run: node tests/hosted-container.mjs
+      - name: Mostrar diagnóstico do container
+        if: always()
+        run: docker logs biblioteca-ci 2>/dev/null || true
+      - name: Limpar somente recursos fictícios desta execução
+        if: always()
+        run: |
+          docker rm -f biblioteca-ci 2>/dev/null || true
+          docker volume rm biblioteca-ci-data biblioteca-ci-backups 2>/dev/null || true
