@@ -13,12 +13,12 @@ services:
     environment:
       LIBRARY_MODE: hosted
       LIBRARY_HOST: 0.0.0.0
-      LIBRARY_PORT: "3001"
+      LIBRARY_PORT: '3001'
       LIBRARY_DB_PATH: /data/library.sqlite
       LIBRARY_ORIGIN: ${LIBRARY_ORIGIN:?Defina a origem HTTPS exata do frontend}
-      LIBRARY_COOKIE_SECURE: "true"
+      LIBRARY_COOKIE_SECURE: 'true'
     expose:
-      - "3001"
+      - '3001'
     volumes:
       - library_data:/data
       - library_backups:/backups
@@ -44,8 +44,8 @@ services:
     environment:
       LIBRARY_API_HOST: ${LIBRARY_API_HOST:?Defina o dominio HTTPS do backend}
     ports:
-      - "80:8080"
-      - "443:8443"
+      - '80:8080'
+      - '443:8443'
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - proxy_data:/data

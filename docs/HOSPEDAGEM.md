@@ -30,34 +30,34 @@ Os domínios .example são reservados para documentação. Substitua-os pelos do
 
 Na raiz do checkout revisado:
 
-~~~bash
+```bash
 cp deploy/.env.hosted.example deploy/.env.hosted
-~~~
+```
 
 Edite o arquivo não versionado:
 
-~~~dotenv
+```dotenv
 LIBRARY_ORIGIN=https://biblioteca.example
 LIBRARY_API_HOST=api.biblioteca.example
-~~~
+```
 
 LIBRARY_ORIGIN é a origem exata do frontend, e não a da API: somente HTTPS e host, com porta quando necessária, sem credenciais, caminho, consulta ou fragmento. LIBRARY_API_HOST é o domínio público do proxy. As demais variáveis são fornecidas pelo Compose: LIBRARY_MODE=hosted, LIBRARY_HOST=0.0.0.0, LIBRARY_PORT=3001, LIBRARY_DB_PATH=/data/library.sqlite e LIBRARY_COOKIE_SECURE=true. Não coloque senhas ou frases de backup nesse arquivo.
 
 Instale Docker com Compose no servidor e confirme DNS, firewall e portas 80/443. Construa e inicie a API:
 
-~~~bash
+```bash
 docker compose --env-file deploy/.env.hosted -f deploy/compose.yaml build
 docker compose --env-file deploy/.env.hosted -f deploy/compose.yaml up -d api
 docker compose --env-file deploy/.env.hosted -f deploy/compose.yaml exec api node server/cli.mjs init
-~~~
+```
 
 A inicialização solicita usuário, nome fictício e senha exclusiva no terminal, sem eco da senha. Não existe senha padrão. Ela cria apenas a administração inicial e recusa repetir essa inicialização sobre uma base com contas existentes.
 
 Depois de apontar o DNS para o servidor autorizado, ative o proxy:
 
-~~~bash
+```bash
 docker compose --env-file deploy/.env.hosted -f deploy/compose.yaml --profile https up -d --build
-~~~
+```
 
 O Caddy usa internamente 8080/8443, mapeados para 80/443 no host. A API não publica porta diretamente. A emissão do certificado depende de DNS e acesso externos reais e não funciona com os domínios fictícios.
 
@@ -67,9 +67,9 @@ Os volumes library_data e library_backups mantêm /data e /backups entre recria�
 
 Após a API HTTPS funcionar e a publicação ser aprovada:
 
-~~~bash
+```bash
 cp deploy/vercel.example.json vercel.json
-~~~
+```
 
 Revise qualquer configuração existente e substitua https://api.biblioteca.example pelo endereço real da API. Preserve regras necessárias ao projeto. Só então aplique a configuração ao projeto Vercel. O arquivo em deploy sozinho não altera a hospedagem e não deve ser ativado apontando para um domínio fictício.
 
@@ -97,20 +97,20 @@ CI e navegador local não substituem a conferência da cadeia HTTPS, rewrite e c
 
 Use nomes novos em cada ensaio, apenas com registros fictícios:
 
-~~~bash
+```bash
 docker compose --env-file deploy/.env.hosted -f deploy/compose.yaml exec api node server/cli.mjs backup /backups/ensaio-ficticio.backup
 docker compose --env-file deploy/.env.hosted -f deploy/compose.yaml exec api node server/cli.mjs verify-backup /backups/ensaio-ficticio.backup
 docker compose --env-file deploy/.env.hosted -f deploy/compose.yaml exec api node server/cli.mjs restore /backups/ensaio-ficticio.backup /backups/ensaio-restaurado.sqlite
-~~~
+```
 
 A CLI pede frase de proteção de pelo menos 16 caracteres, sem eco. O backup usa AES-256-GCM e chave derivada com scrypt. A validação confere integridade, estrutura, relacionamentos, contagens e conteúdo por tabela. A restauração cria outro arquivo, preserva a origem e revoga as sessões da cópia restaurada; recusa destino existente.
 
 O volume separado de backups não protege contra perda do servidor. Exporte o arquivo criptografado:
 
-~~~bash
+```bash
 mkdir -p backups-ficticios
 docker compose --env-file deploy/.env.hosted -f deploy/compose.yaml cp api:/backups/ensaio-ficticio.backup ./backups-ficticios/ensaio-ficticio.backup
-~~~
+```
 
 Conserve cópia fora do servidor em destino aprovado e proteja a frase separadamente. Defina frequência, retenção e responsáveis com a biblioteca. Nenhum envio externo ou agendamento foi configurado.
 
@@ -118,8 +118,8 @@ Para ensaiar atendimento a partir do banco restaurado, use outra instância com 
 
 Recuperação administrativa técnica, restrita a quem possui acesso autorizado ao servidor:
 
-~~~bash
+```bash
 docker compose --env-file deploy/.env.hosted -f deploy/compose.yaml exec api node server/cli.mjs recover-admin
-~~~
+```
 
 A recuperação redefine a senha e revoga as sessões da conta. Restrinja o acesso administrativo ao servidor e ao arquivo do banco. Estes procedimentos não autorizam migração real ou exclusão de títulos repetidos.

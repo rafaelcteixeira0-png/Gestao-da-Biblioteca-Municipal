@@ -1474,9 +1474,7 @@ export function OperationalPage() {
         <div className="op-heading">
           <p>Biblioteca Pública Municipal de Cianorte</p>
           <h1>Atendimento</h1>
-          <p className="op-environment">
-            Dados fictícios · Ambiente de testes
-          </p>
+          <p className="op-environment">Dados fictícios · Ambiente de testes</p>
         </div>
         <a className="op-button secondary" href="#dashboard">
           Abrir demonstração
@@ -1500,7 +1498,8 @@ export function OperationalPage() {
         <section className="op-login" aria-label="Acesso ao atendimento">
           <h2>Entrar no atendimento</h2>
           <p>
-            Use a conta criada na configuração do sistema. Não existe senha padrão.
+            Use a conta criada na configuração do sistema. Não existe senha
+            padrão.
           </p>
           <form className="op-form" onSubmit={login}>
             <fieldset disabled={busy}>
