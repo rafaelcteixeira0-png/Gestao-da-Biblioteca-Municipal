@@ -1,0 +1,21 @@
+# Example HTTPS endpoint. Configure DNS and hosting only after approval.
+{
+	http_port 8080
+	https_port 8443
+	auto_https disable_redirects
+}
+
+# Explicit external URL avoids redirecting visitors to internal port 8443.
+http://{$LIBRARY_API_HOST}:8080 {
+	redir https://{$LIBRARY_API_HOST}{uri} 308
+}
+
+https://{$LIBRARY_API_HOST}:8443 {
+	header -Server
+	handle /api/* {
+		reverse_proxy api:3001
+	}
+	handle {
+		respond "Operacao nao encontrada." 404
+	}
+}

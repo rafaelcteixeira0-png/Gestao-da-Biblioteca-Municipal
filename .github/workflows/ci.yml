@@ -77,3 +77,45 @@ jobs:
           for result in "$FORMAT" "$LINT" "$TYPES" "$SERVER" "$BUILD" "$BROWSER" "$INTERFACE"; do
             test "$result" = success || exit 1
           done
+
+  container:
+    name: API hospedada e recuperação em container
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Construir API e proxy
+        run: |
+          docker build --target api -t biblioteca-api:ci .
+          docker build --target proxy -t biblioteca-proxy:ci .
+      - name: Conferir exemplos de implantação
+        run: |
+          docker compose --env-file deploy/.env.hosted.example -f deploy/compose.yaml --profile https config --quiet
+          docker run --rm -e LIBRARY_API_HOST=api.biblioteca.example --entrypoint caddy biblioteca-proxy:ci adapt --config /etc/caddy/Caddyfile --pretty > /tmp/biblioteca-caddy.json
+      - name: Iniciar API com volumes fictícios exclusivos
+        run: |
+          docker volume create biblioteca-ci-data
+          docker volume create biblioteca-ci-backups
+          docker run -d --name biblioteca-ci --read-only --tmpfs /tmp:rw,nosuid,noexec,size=64m,mode=1777 \
+            --cap-drop ALL --security-opt no-new-privileges:true \
+            -p 127.0.0.1:4301:3001 \
+            -e LIBRARY_MODE=hosted -e LIBRARY_HOST=0.0.0.0 -e LIBRARY_PORT=3001 \
+            -e LIBRARY_ORIGIN=https://biblioteca.example -e LIBRARY_COOKIE_SECURE=true \
+            -e LIBRARY_DB_PATH=/data/library.sqlite \
+            -v biblioteca-ci-data:/data -v biblioteca-ci-backups:/backups biblioteca-api:ci
+      - name: Verificar operações, reinício e recuperação
+        env:
+          LIBRARY_TEST_CONTAINER: biblioteca-ci
+          LIBRARY_TEST_URL: http://127.0.0.1:4301
+        run: node tests/hosted-container.mjs
+      - name: Mostrar diagnóstico do container
+        if: always()
+        run: docker logs biblioteca-ci 2>/dev/null || true
+      - name: Limpar somente recursos fictícios desta execução
+        if: always()
+        run: |
+          docker rm -f biblioteca-ci 2>/dev/null || true
+          docker volume rm biblioteca-ci-data biblioteca-ci-backups 2>/dev/null || true

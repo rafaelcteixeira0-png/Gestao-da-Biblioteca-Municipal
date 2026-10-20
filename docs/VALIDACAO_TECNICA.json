@@ -4,9 +4,9 @@
   "branch": "codex/reconstrucao-operacional",
   "dataset": "fictional-local",
   "evidence": {
-    "runId": 39273011180,
-    "url": "https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39273011180",
-    "commit": "2bea619a38c970007cc63b025043d24412b11999"
+    "runId": 39438201882,
+    "url": "https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39438201882",
+    "commit": "7920b52677f751e6a01be383e1fa050e2afdd1d2"
   },
   "checks": {
     "dependencies": "passed",
@@ -23,7 +23,7 @@
       "failed": 0,
       "projects": ["desktop Chromium", "mobile Chromium emulation"]
     },
-    "formatting": "Final corrections tracked in branch CI"
+    "formatting": "passed"
   },
   "visualReview": {
     "performed": true,
@@ -34,6 +34,12 @@
   },
   "recoveryEvidence": "RECUPERACAO.json",
   "historicalLocalEvidence": "VALIDACAO_LOCAL_2026-10-18.json",
+  "hostingPreparation": {
+    "status": "prepared; awaiting container CI",
+    "providerSelected": false,
+    "publicDomainConfigured": false,
+    "deployed": false
+  },
   "production": {
     "merged": false,
     "deployed": false,

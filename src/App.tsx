@@ -53,7 +53,7 @@ function Sidebar({
       <nav aria-label="Menu principal">
         <a href="#atendimento" className="nav-link">
           <ShieldCheck size={19} strokeWidth={1.7} />
-          <span>Atendimento local</span>
+          <span>Atendimento</span>
         </a>
         {['PRINCIPAL', 'CADASTROS', 'ANÁLISE'].map((group) => (
           <div className="nav-group" key={group}>

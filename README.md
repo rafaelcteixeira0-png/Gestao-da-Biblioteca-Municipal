@@ -1,8 +1,8 @@
 # Biblioteca Pública Municipal de Cianorte
 
-Sistema web em evolução para apoiar o atendimento da biblioteca. A interface React + TypeScript preserva o dashboard e as consultas demonstrativas e oferece uma área de atendimento local com API Node.js e SQLite.
+Sistema web em evolução para apoiar o atendimento da biblioteca. A interface React + TypeScript preserva o dashboard e as consultas demonstrativas e oferece uma área de atendimento com API Node.js e SQLite.
 
-**Use somente registros fictícios nesta entrega.** As consultas demonstrativas mantêm os exemplos em memória e a data fixa de **13/10/2026**. A opção **Atendimento local** abre uma área separada com login e registros persistidos no SQLite local. Nenhum exemplo é importado automaticamente e não há senha padrão.
+**Use somente registros fictícios nesta entrega.** As consultas demonstrativas mantêm os exemplos em memória e a data fixa de **13/10/2026**. A opção **Atendimento** abre uma área separada com login e registros persistidos no SQLite local. Nenhum exemplo é importado automaticamente e não há senha padrão.
 
 O atendimento permite criar e editar leitores, obras e exemplares; registrar empréstimos com vários itens; devolver parte dos itens e renovar um exemplar por vez. Permissões, versões concorrentes e exclusividade dos empréstimos são verificadas no servidor. Alterações e circulação preservam histórico. Backup criptografado e restauração em arquivo separado são feitos pela CLI.
 
@@ -19,6 +19,8 @@ O código e as etapas estão na branch [`codex/reconstrucao-operacional`](https:
 - Busca global de livros e leitores; exportação de um resumo agregado fictício.
 - Layout em azul, branco e cinza, menu móvel, navegação por teclado e tabelas com rolagem própria em telas estreitas.
 
+Consulte também [o pacote de hospedagem do atendimento completo](docs/HOSPEDAGEM.md), com Docker, volume persistente e exemplo de conexão à Vercel. O servidor e o domínio ainda precisam ser definidos; a configuração de exemplo não publica serviços.
+
 ## Desenvolvimento no ambiente Codex
 
 Requer Node.js 24+ e npm. Os comandos abaixo executam a versão local:
@@ -30,7 +32,7 @@ npm run build
 npm start
 ```
 
-Abra `http://localhost:3001` e escolha **Atendimento local**. A inicialização solicita usuário, nome e senha do primeiro administrador. Preserve o arquivo `.library-data/library.sqlite` e sua senha de backup. Não carregue planilhas ou dados pessoais nesta revisão. Para desenvolvimento com Vite e API em processos separados, veja a documentação operacional.
+Abra `http://localhost:3001` e escolha **Atendimento**. A inicialização solicita usuário, nome e senha do primeiro administrador. Preserve o arquivo `.library-data/library.sqlite` e sua senha de backup. Não carregue planilhas ou dados pessoais nesta revisão. Para desenvolvimento com Vite e API em processos separados, veja a documentação operacional.
 
 ## Verificações
 

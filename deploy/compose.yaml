@@ -1,0 +1,76 @@
+# Template only. No service is created until an operator runs Compose.
+name: biblioteca-homologacao
+
+services:
+  api:
+    image: biblioteca-api:local
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: api
+    init: true
+    restart: unless-stopped
+    environment:
+      LIBRARY_MODE: hosted
+      LIBRARY_HOST: 0.0.0.0
+      LIBRARY_PORT: "3001"
+      LIBRARY_DB_PATH: /data/library.sqlite
+      LIBRARY_ORIGIN: ${LIBRARY_ORIGIN:?Defina a origem HTTPS exata do frontend}
+      LIBRARY_COOKIE_SECURE: "true"
+    expose:
+      - "3001"
+    volumes:
+      - library_data:/data
+      - library_backups:/backups
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=512m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+
+  caddy:
+    profiles:
+      - https
+    image: biblioteca-proxy:local
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: proxy
+    restart: unless-stopped
+    environment:
+      LIBRARY_API_HOST: ${LIBRARY_API_HOST:?Defina o dominio HTTPS do backend}
+    ports:
+      - "80:8080"
+      - "443:8443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - proxy_data:/data
+      - proxy_config:/config
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=32m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - backend
+      - edge
+
+volumes:
+  library_data:
+  library_backups:
+  proxy_data:
+  proxy_config:
+
+networks:
+  backend:
+    internal: true
+  edge:

@@ -1,0 +1,8 @@
+# Allow only files needed to build the API and proxy images.
+**
+!Dockerfile
+!package.json
+!server/
+!server/**
+!deploy/
+!deploy/Caddyfile
