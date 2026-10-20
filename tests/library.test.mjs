@@ -209,7 +209,9 @@ test('campos descritivos preservam ordinais e expoentes em NFC no cadastro, ediÃ
     library.listWorks().find((work) => work.id === created.id),
     updated,
   )
-  const [editedEvent, createdEvent] = library.getHistory({ entityId: created.id })
+  const [editedEvent, createdEvent] = library.getHistory({
+    entityId: created.id,
+  })
   assert.equal(createdEvent.type, 'work.created')
   assert.equal(createdEvent.before, null)
   assert.deepEqual(createdEvent.after, created)

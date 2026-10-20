@@ -139,10 +139,10 @@ A [primeira execução](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblio
 
 A [segunda execução](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions/runs/39273011180), no commit `2bea619a38c970007cc63b025043d24412b11999`, aprovou:
 
-| Verificação | Resultado |
-| --- | --- |
-| Instalação, lint, tipos e build | Aprovados |
-| Servidor | 90 aprovados, 0 falhas |
+| Verificação                       | Resultado                             |
+| --------------------------------- | ------------------------------------- |
+| Instalação, lint, tipos e build   | Aprovados                             |
+| Servidor                          | 90 aprovados, 0 falhas                |
 | Chromium desktop e emulação móvel | 34 aprovados, 0 falhas, 26,7 segundos |
 
 Essa execução reprovou somente a formatação de dois arquivos. O CI gera as correções exatas do Prettier e exige aprovação de todas as etapas. A conferência final está nas [execuções atuais desta branch](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/actions?query=branch%3Acodex%2Freconstrucao-operacional).

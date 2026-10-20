@@ -21,24 +21,14 @@
     "browser": {
       "passed": 34,
       "failed": 0,
-      "projects": [
-        "desktop Chromium",
-        "mobile Chromium emulation"
-      ]
+      "projects": ["desktop Chromium", "mobile Chromium emulation"]
     },
     "formatting": "Final corrections tracked in branch CI"
   },
   "visualReview": {
     "performed": true,
-    "areas": [
-      "readers",
-      "circulation",
-      "history"
-    ],
-    "widths": [
-      390,
-      1440
-    ],
+    "areas": ["readers", "circulation", "history"],
+    "widths": [390, 1440],
     "physicalDevicesTested": false,
     "institutionalAcceptance": false
   },
