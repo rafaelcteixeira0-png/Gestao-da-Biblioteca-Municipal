@@ -2,13 +2,19 @@
 
 Sistema web em evolução para apoiar o atendimento da biblioteca. A interface React + TypeScript preserva o dashboard e as consultas demonstrativas e oferece uma área de atendimento com API Node.js e SQLite.
 
-**Use somente registros fictícios nesta entrega.** As consultas demonstrativas mantêm os exemplos em memória e a data fixa de **13/10/2026**. A opção **Atendimento** abre uma área separada com login e registros persistidos no SQLite local. Nenhum exemplo é importado automaticamente e não há senha padrão.
+**Use somente registros fictícios nesta entrega.** As consultas demonstrativas mantêm os exemplos em memória e a data fixa de **13/10/2026**. A área **Atendimento com banco**, em `/#atendimento`, oferece login e registros persistidos no SQLite local. Nenhum exemplo é importado automaticamente e não há senha padrão.
 
 O atendimento permite criar e editar leitores, obras e exemplares; registrar empréstimos com vários itens; devolver parte dos itens e renovar um exemplar por vez. Permissões, versões concorrentes e exclusividade dos empréstimos são verificadas no servidor. Alterações e circulação preservam histórico. Backup criptografado e restauração em arquivo separado são feitos pela CLI.
 
 Consulte [a entrega operacional e suas limitações](docs/ENTREGA_OPERACIONAL.md) e [o resultado de recuperação com dados fictícios](docs/RECUPERACAO.json). A publicação Vercel existente continua sendo a demonstração: este servidor SQLite requer um processo Node.js com disco persistente e não foi publicado.
 
 O código e as etapas estão na branch [`codex/reconstrucao-operacional`](https://github.com/rafaelcteixeira0-png/Gestao-da-Biblioteca-Municipal/tree/codex/reconstrucao-operacional). O CI aprovou 102 testes do servidor, 34 execuções de navegador, formatação, lint, tipos, build e o ensaio de persistência e recuperação em container. Consulte [os resultados e a conferência final](docs/ENTREGA_OPERACIONAL.md) e [o registro do envio](docs/ENVIO_GITHUB.md).
+
+## Experimentar sem servidor
+
+A opção **Atendimento** abre o [modo de teste](docs/TESTE_ATENDIMENTO.md), em `/#atendimento-teste`. Use **biblioteca.cianorte** e **BibliotecaTeste2026**. Esse acesso é um exemplo público, sem autenticação real: cadastros e circulação são simulados, ficam apenas na memória e são descartados ao recarregar ou sair da área. Use somente dados fictícios.
+
+Para operar o SQLite com a API, abra diretamente `/#atendimento`, com uma conta criada pela CLI. O acesso público de teste não cria uma conta no banco. A integração Neon continua pendente.
 
 ## O que pode ser revisado no navegador
 
@@ -32,7 +38,7 @@ npm run build
 npm start
 ```
 
-Abra `http://localhost:3001` e escolha **Atendimento**. A inicialização solicita usuário, nome e senha do primeiro administrador. Preserve o arquivo `.library-data/library.sqlite` e sua senha de backup. Não carregue planilhas ou dados pessoais nesta revisão. Para desenvolvimento com Vite e API em processos separados, veja a documentação operacional.
+Abra `http://localhost:3001/#atendimento` para usar o banco local. A inicialização solicita usuário, nome e senha do primeiro administrador. Preserve o arquivo `.library-data/library.sqlite` e sua senha de backup. Não carregue planilhas ou dados pessoais nesta revisão. Para desenvolvimento com Vite e API em processos separados, veja a documentação operacional.
 
 ## Verificações
 

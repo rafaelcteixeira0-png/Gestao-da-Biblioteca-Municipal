@@ -1,0 +1,61 @@
+{
+  "updatedAt": "2026-10-20",
+  "scope": "Local validation before publication of the public browser-only demonstration",
+  "branch": "codex/teste-atendimento-online",
+  "route": "/#atendimento-teste",
+  "publicExampleAccess": true,
+  "realAccountCreated": false,
+  "neonIntegrationImplemented": false,
+  "paidServiceContracted": false,
+  "checks": {
+    "dependencies": "passed",
+    "formatting": "passed",
+    "lint": "passed",
+    "types": "passed",
+    "build": "passed",
+    "server": {
+      "passed": 102,
+      "failed": 0,
+      "skipped": 0
+    },
+    "demoClient": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "existingPassed": 34,
+      "demoPassed": 8,
+      "totalPassed": 42,
+      "failed": 0,
+      "projects": ["desktop Chromium", "mobile Chromium emulation"]
+    }
+  },
+  "demoCoverage": [
+    "incorrect and valid public example access",
+    "create and edit readers, works and copies",
+    "optional author and version conflicts",
+    "multi-item checkout and unavailable copy",
+    "idempotency and rollback on invalid circulation commands",
+    "partial return and individual renewal",
+    "history snapshots",
+    "no API requests",
+    "no localStorage, sessionStorage or cookies",
+    "separate tabs",
+    "discard on reload and leaving test area",
+    "keyboard and axe",
+    "widths 320, 390 and 1440 pixels"
+  ],
+  "visualReview": {
+    "performed": true,
+    "area": "readers",
+    "widths": [390, 1440],
+    "physicalDevicesTested": false
+  },
+  "limitations": [
+    "All demonstration data is temporary and isolated in the browser.",
+    "Public example access is not authentication for private data.",
+    "The persistent API and its recovery workflow remain separate.",
+    "PostgreSQL/Neon deployment and a real online account remain pending."
+  ]
+}

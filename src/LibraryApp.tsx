@@ -2,15 +2,20 @@ import { useEffect, useState } from 'react'
 import App from './App'
 import { OperationalPage } from './components/OperationalPage'
 
+function currentArea() {
+  return window.location.hash.split('?')[0]
+}
+
 export default function LibraryApp() {
-  const [operational, setOperational] = useState(
-    () => window.location.hash.split('?')[0] === '#atendimento',
-  )
+  const [area, setArea] = useState(currentArea)
   useEffect(() => {
-    const update = () =>
-      setOperational(window.location.hash.split('?')[0] === '#atendimento')
+    const update = () => setArea(currentArea())
     window.addEventListener('hashchange', update)
     return () => window.removeEventListener('hashchange', update)
   }, [])
-  return operational ? <OperationalPage /> : <App />
+  if (area === '#atendimento-teste')
+    return <OperationalPage mode="demo" key="demo" />
+  if (area === '#atendimento')
+    return <OperationalPage mode="persisted" key="persisted" />
+  return <App />
 }

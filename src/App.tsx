@@ -51,7 +51,7 @@ function Sidebar({
         )}
       </div>
       <nav aria-label="Menu principal">
-        <a href="#atendimento" className="nav-link">
+        <a href="#atendimento-teste" className="nav-link">
           <ShieldCheck size={19} strokeWidth={1.7} />
           <span>Atendimento</span>
         </a>

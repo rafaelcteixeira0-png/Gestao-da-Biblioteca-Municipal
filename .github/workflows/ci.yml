@@ -36,6 +36,9 @@ jobs:
       - id: server
         run: npm run test:server
         continue-on-error: true
+      - id: demo
+        run: npm run test:demo
+        continue-on-error: true
       - id: build
         run: npm run build
         continue-on-error: true
@@ -70,11 +73,12 @@ jobs:
           LINT: ${{ steps.lint.outcome }}
           TYPES: ${{ steps.types.outcome }}
           SERVER: ${{ steps.server.outcome }}
+          DEMO: ${{ steps.demo.outcome }}
           BUILD: ${{ steps.build.outcome }}
           BROWSER: ${{ steps.browser.outcome }}
           INTERFACE: ${{ steps.interface.outcome }}
         run: |
-          for result in "$FORMAT" "$LINT" "$TYPES" "$SERVER" "$BUILD" "$BROWSER" "$INTERFACE"; do
+          for result in "$FORMAT" "$LINT" "$TYPES" "$SERVER" "$DEMO" "$BUILD" "$BROWSER" "$INTERFACE"; do
             test "$result" = success || exit 1
           done
 
